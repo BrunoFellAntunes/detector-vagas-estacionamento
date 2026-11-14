@@ -12,9 +12,11 @@ O projeto investiga a dificuldade de consultar rapidamente quais vagas de um est
 
 ## Situação atual
 
-O protótipo foi verificado com dados simulados. O repositório também inclui uma filmagem real de terceiros para os próximos testes. A coleta própria e a validação do detector em estacionamento real são acompanhadas nas [issues do projeto](https://github.com/VitorRodi/detector-vagas-estacionamento/issues). O vídeo final do grupo ainda não foi gravado ou publicado. A entrega exigida é um link do YouTube acessível e este repositório público.
+O protótipo foi verificado com dados simulados e executa uma demonstração com cinco vagas cadastradas em uma filmagem real de terceiros. A amostra visualmente rotulada do clipe permite uma conferência exploratória; não representa validação independente em outros estacionamentos. A coleta própria e a avaliação em outras gravações são acompanhadas nas [issues do projeto](https://github.com/VitorRodi/detector-vagas-estacionamento/issues). O vídeo final do grupo ainda não foi gravado ou publicado. A entrega exigida é um link do YouTube acessível e este repositório público.
 
 ![Demonstração com seis vagas simuladas](assets/demonstracao_simulada.png)
+
+![Cinco vagas monitoradas no vídeo real de terceiros](assets/demonstracao_real.png)
 
 ## Tecnologias e método
 
@@ -38,12 +40,22 @@ Abra o terminal **nesta pasta**, com Python 3.10 ou mais recente:
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe executar_exemplo.py --show
+```
+
+Esse comando processa o vídeo real incluído, usa a referência e as cinco regiões cadastradas, exporta os resultados e avalia a amostra de 60 rótulos visuais. A janela permite pausar com espaço e sair com Q ou Esc. Sem `--show`, a execução não abre janela. Para conhecer a seleção das vagas e as limitações dessa avaliação, leia [o experimento real](docs/EXPERIMENTO_REAL.md).
+
+Para repetir a demonstração simulada:
+
+```powershell
 .\.venv\Scripts\python.exe demo.py
 .\.venv\Scripts\python.exe detector.py --source dados/cena_simulada.png --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/imagem
 .\.venv\Scripts\python.exe detector.py --source dados/video_simulado.mp4 --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/video
 ```
 
-Os dados de entrada simulados estão versionados e podem ser regenerados. Os arquivos de saída são criados pelos comandos acima. Abra `resultados/imagem/imagem_anotada.png` ou `resultados/video/video_anotado.mp4` para consultar a saída. Adicione `--show` para exibir uma janela; use Q para sair. Em Linux e macOS, crie o ambiente com `python3 -m venv .venv` e use `.venv/bin/python` nos mesmos comandos.
+As saídas do exemplo real ficam em `resultados/carpark/`; as da simulação ficam em `resultados/imagem/` e `resultados/video/`. Os dados de entrada simulados estão versionados e podem ser regenerados. Em Linux e macOS, crie o ambiente com `python3 -m venv .venv` e use `.venv/bin/python` nos mesmos comandos.
+
+Cada execução exporta `ocupacao.csv`, `eventos.csv`, `resumo.json` e `ultimo_quadro.png`, além de imagem ou vídeo anotado. O exemplo real também gera `avaliacao.json`. Os eventos incluem a confirmação do estado inicial e as mudanças posteriores. O resumo registra o tempo total de execução, que inclui exportação e eventual reprodução e pausa; com janela aberta, sua taxa não é um benchmark isolado do algoritmo. A avaliação completa é omitida se a reprodução for encerrada pelo usuário antes do fim.
 
 ## Usar imagens reais
 
@@ -51,7 +63,7 @@ Os dados de entrada simulados estão versionados e podem ser regenerados. Os arq
 
 [Abrir carPark.mp4](dados/terceiros/carPark.mp4): filmagem de estacionamento com 679 quadros, 24 FPS, resolução de 1100 × 720 e duração aproximada de 28,29 segundos. O arquivo foi obtido do projeto de [Harsh Bafna](https://github.com/harshbafnaa/car-parking-detection). Os créditos, a declaração de licença na fonte e a revisão utilizada estão em [docs/FONTES_MIDIA.md](docs/FONTES_MIDIA.md); a integridade e as características do arquivo estão em [carPark.metadata.json](dados/terceiros/carPark.metadata.json).
 
-O arquivo é uma entrada para experimentos, não uma gravação do grupo nem um resultado do nosso detector. Antes de processá-lo, identifiquem vagas vazias em um quadro, extraiam a referência e cadastrem somente essas vagas. Não usem o JSON da simulação neste vídeo. A inclusão do arquivo ainda não valida o algoritmo em cenas reais.
+O arquivo é uma gravação externa. Para reproduzir o experimento, usem `executar_exemplo.py`, que utiliza `referencia_carpark.png` e `vagas_carpark.json`. Foram selecionadas cinco regiões internas que estão vazias no quadro 678; as outras vagas visíveis não são monitoradas. Não usem o JSON da simulação neste vídeo. Os parâmetros iniciais foram mantidos; a escolha das regiões e da referência foi feita no próprio clipe, o que limita a interpretação dos resultados.
 
 ### Gravação e calibração
 
@@ -95,7 +107,9 @@ CSV: `quadro`, `tempo_video_s`, `vaga`, `estado`, `fracao_alterada`. O tempo é 
 .\.venv\Scripts\python.exe verificar_demo.py
 ```
 
-A suíte contém 11 testes de comportamento. Rode `verificar_demo.py` depois de gerar e processar o vídeo simulado. A simulação possui 240 quadros, 6 vagas e 1.440 decisões: 1.408 concordantes com o gabarito, 24 indefinidas na inicialização e 8 divergentes durante a confirmação de transições. A concordância de 97,78% descreve **apenas essa simulação**, não a precisão em campo. O verificador reabre o vídeo anotado, decodifica seus 240 quadros e gera `resultados/verificacao_demo.json`. O GitHub Actions repete esses passos em Windows e Linux.
+A suíte contém 20 testes, incluindo uma execução completa do vídeo real a partir de outra pasta e rejeição de clipes incompletos. Rode `verificar_demo.py` depois de gerar e processar o vídeo simulado. A simulação possui 240 quadros, 6 vagas e 1.440 decisões: 1.408 concordantes com o gabarito, 24 indefinidas na inicialização e 8 divergentes durante a confirmação de transições. A concordância de 97,78% descreve **apenas essa simulação**, não a precisão em campo. O verificador reabre o vídeo anotado, decodifica seus 240 quadros e gera `resultados/verificacao_demo.json`. O GitHub Actions repete a suíte e os cenários simulado e real em Windows e Linux.
+
+No clipe real, os 679 quadros geram 3.395 decisões sobre cinco regiões. A amostra rotulada contém 60 pares de quadro e vaga: 54 concordantes, cinco indefinidos na inicialização e um falso positivo na confirmação de uma saída. A concordância total da amostra é 90%, e a cobertura é 91,67%. Os detalhes e a matriz de confusão estão em [EXPERIMENTO_REAL.md](docs/EXPERIMENTO_REAL.md). Não extrapolar essas medidas para outros vídeos.
 
 ## Estrutura
 
@@ -105,6 +119,8 @@ calibrar.py                 Cadastro manual das vagas
 demo.py                     Geração do cenário simulado e do gabarito
 extrair_referencia.py       Extração de quadro para calibração real
 verificar_demo.py           Conferência independente da saída simulada
+executar_exemplo.py         Execução e avaliação do vídeo real em um comando
+avaliar.py                  Métricas a partir de rótulos por quadro e vaga
 requirements.txt           Dependências
 tests/                     Testes de comportamento
 dados/                     Entradas simuladas reproduzíveis
@@ -113,12 +129,13 @@ assets/                    Imagem da demonstração
 docs/COLETA_REAL.md         Como gravar e registrar imagens reais
 docs/ROTEIRO_VIDEO.md       Roteiro com participação dos quatro integrantes
 docs/ENTREGA.md             Critérios e conferência dos links finais
+docs/EXPERIMENTO_REAL.md    Regiões, rótulos, resultados e limitações
 .github/workflows/         Execução automática dos testes
 ```
 
 ## Pendências acadêmicas
 
-Definir o estacionamento; concluir a observação/entrevista prevista na etapa 1; obter referência vazia e vídeos autorizados; calibrar e rotular dados reais; medir erros, estados indefinidos, atraso e velocidade; gravar a apresentação com os quatro integrantes e publicar no YouTube como público ou não listado. Não há resultados de campo disponíveis.
+Definir o estacionamento da investigação própria; concluir a observação/entrevista prevista na etapa 1; obter gravações próprias autorizadas; avaliar em sequências independentes da calibração; gravar a apresentação com os quatro integrantes e publicar no YouTube como público ou não listado. A demonstração com vídeo externo já é reproduzível, mas ainda não há coleta de campo do grupo.
 
 O [roteiro de apresentação](docs/ROTEIRO_VIDEO.md) tem duração planejada de 8 minutos e 40 segundos. Os requisitos do professor e o estado de cada entrega estão em [docs/ENTREGA.md](docs/ENTREGA.md).
 

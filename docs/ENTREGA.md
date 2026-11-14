@@ -24,7 +24,7 @@ Apresentação exclusivamente com slides e vídeo privado não atendem às regra
 
 ## Estado do projeto
 
-O detector, o cadastro manual, as entradas simuladas e os testes estão disponíveis. A interação por mouse e a captura em câmera física ainda dependem do ensaio no equipamento do grupo. O cenário simulado comprova a execução do fluxo em condições controladas. A coleta real, a validação no estacionamento e a apresentação final continuam pendentes.
+O detector, o cadastro manual, as entradas simuladas e os testes estão disponíveis. O exemplo real em `executar_exemplo.py` processa cinco regiões de uma filmagem externa e avalia uma amostra de 60 rótulos visuais. A interação de cadastro por mouse e a captura em câmera física ainda dependem do ensaio no equipamento do grupo. A coleta própria, a avaliação em sequências independentes e a apresentação final continuam pendentes.
 
 As tarefas são acompanhadas nas [issues](https://github.com/VitorRodi/detector-vagas-estacionamento/issues), com critérios de conclusão e registros das verificações.
 

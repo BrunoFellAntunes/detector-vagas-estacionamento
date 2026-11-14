@@ -46,7 +46,7 @@ Para ensaiar com dados simulados:
 .\.venv\Scripts\python.exe detector.py --source dados/cena_simulada.png --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/imagem --show
 ```
 
-Para a demonstração real, usar os comandos e arquivos revisados de `COLETA_REAL.md`. Mostrar no vídeo o comando completo e pelo menos um trecho do processamento. A demonstração deve usar o mesmo código publicado no GitHub.
+O exemplo real já cadastrado pode ser aberto com `.\.venv\Scripts\python.exe executar_exemplo.py --show`. Ele monitora cinco regiões do vídeo de terceiros; explicar a origem, a referência do quadro 678 e a seleção das regiões conforme `EXPERIMENTO_REAL.md`. A janela pode ser pausada com espaço para explicar as saídas. Para uma gravação própria, seguir `COLETA_REAL.md`. Mostrar o comando completo e pelo menos um trecho do processamento. A demonstração deve usar o mesmo código publicado no GitHub.
 
 ## Edson Leandro Soares continua a demonstração
 
