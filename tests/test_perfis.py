@@ -81,7 +81,7 @@ class ProfileTests(unittest.TestCase):
         session=load_session(ROOT,profile=profile)
         self.assertEqual(session.frame_count,12)
         self.assertEqual(session.counts(11),{'livre':1,'ocupada':0,'indefinida':0})
-        self.assertEqual(session.source,self.video)
+        self.assertTrue(session.source.samefile(self.video),'A sessão deve usar o vídeo importado, inclusive com caminhos curtos do Windows')
         self.assertEqual(session.evaluation,{},'Um vídeo novo não herda a avaliação do exemplo')
         target=self.root/'exportado.zip';session.export(target)
         with zipfile.ZipFile(target) as archive:

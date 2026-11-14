@@ -176,7 +176,7 @@ class EditorTests(unittest.TestCase):
             while window.session is None and time.monotonic()<deadline:QTest.qWait(50)
             self.assertIsNotNone(window.session,window.status_label.text())
         wait_analysis()
-        self.assertEqual(window.session.source,video)
+        self.assertTrue(window.session.source.samefile(video),'A sessão deve usar o vídeo importado, inclusive com caminhos curtos do Windows')
         self.assertIn('Pátio próprio',window.subtitle.text())
         self.assertEqual(window.source_badge.text(),'Vídeo local')
         self.assertEqual(window.free_value.text(),'1')
