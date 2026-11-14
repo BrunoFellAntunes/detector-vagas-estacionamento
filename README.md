@@ -99,7 +99,9 @@ Os resultados antigos são invalidados ao iniciar uma nova execução. Vídeo in
 .\.venv\Scripts\python.exe verificar_demo.py
 ```
 
-A suíte completa tem 60 testes. Instale `requirements-app.txt` para incluir os testes reais de widgets Qt; com somente `requirements.txt`, os testes de Qt são omitidos. A suíte cobre textura, referência, confirmação temporal, avaliação, exportação, reprodução, erros, cancelamento, rolagem, ambiguidade, importação de vídeos, revisões de perfis e edição pelo mouse no painel. GitHub Actions executa em Windows e Linux e repete os vídeos simulado, completo e anterior.
+A suíte completa tem 92 testes. Instale `requirements-app.txt` para incluir os testes reais de widgets Qt; com somente `requirements.txt`, os testes de Qt são omitidos. A suíte cobre textura, referência, confirmação temporal, avaliação, exportação, reprodução, erros, cancelamento, rolagem, ambiguidade, importação de vídeos, revisões de perfis, edição pelo mouse, duplicação de vagas e persistência de rascunhos. GitHub Actions executa em Windows e Linux e repete os vídeos simulado, completo e anterior.
+
+Os serviços de [duplicação de vagas](docs/DUPLICACAO.md) e [rascunhos locais](docs/RASCUNHOS.md) estão implementados e testados de forma independente. A ligação desses serviços aos controles do editor ainda é uma etapa posterior; o painel atual mantém rascunhos somente durante a sessão.
 
 A simulação tem 240 quadros e seis vagas: 1.408 de 1.440 decisões concordantes, 24 indefinidas na inicialização e oito divergentes durante a confirmação temporal. A concordância de 97,78% descreve somente essa simulação.
 
