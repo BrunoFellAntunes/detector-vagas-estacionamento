@@ -6,6 +6,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
+import time
 
 import cv2
 import numpy as np
@@ -103,11 +104,16 @@ class Detector:
             cv2.polylines(out, [pts], True, colors[result['state']], 3)
             x, y = pts.min(axis=0)
             label = f"{space['id']} {result['state']} {result['ratio']:.0%}"
-            cv2.putText(out, label, (int(x), max(60, int(y) - 8)),
+            text_y = max(60, int(y) - 8)
+            (label_w, label_h), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, .48, 1)
+            text_x = max(0, min(int(x), out.shape[1] - label_w - 5))
+            cv2.rectangle(out, (text_x, text_y-label_h-5),
+                          (text_x+label_w+5, text_y+baseline), (25,25,25), -1)
+            cv2.putText(out, label, (text_x+2, text_y),
                         cv2.FONT_HERSHEY_SIMPLEX, .48, colors[result['state']], 1, cv2.LINE_AA)
         counts = {state: sum(r['state'] == state for r in results) for state in colors}
         cv2.rectangle(out, (0, 0), (out.shape[1], 40), (25, 25, 25), -1)
-        text = ' | '.join(f'{k}: {v}' for k, v in counts.items())
+        text = f'Monitoradas: {len(results)} | ' + ' | '.join(f'{k}: {v}' for k, v in counts.items())
         cv2.putText(out, text, (12, 27), cv2.FONT_HERSHEY_SIMPLEX, .6, (255, 255, 255), 1, cv2.LINE_AA)
         return out
 
@@ -117,6 +123,9 @@ def run(args):
     detector = Detector(read_image(args.reference), config)
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
+    # Esses relatórios deixam de ser válidos quando uma nova execução começa.
+    for name in ['resumo.json','avaliacao.json']:
+        (output/name).unlink(missing_ok=True)
     image_mode = Path(args.source).suffix.lower() in {'.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff'}
     capture = writer = None
     try:
@@ -138,31 +147,85 @@ def run(args):
             if not writer.isOpened():
                 raise ValueError('Não foi possível criar o vídeo de saída.')
         frame_number = 0
+        event_count = 0
+        previous_states = {space['id']: 'indefinida' for space in detector.spaces}
+        interrupted = False
+        started = time.perf_counter()
+        window = 'Monitoramento de vagas - Espaco: pausa | Q: sair'
+        if args.show:
+            cv2.namedWindow(window, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(window,min(first.shape[1],1280),min(first.shape[0],720))
         frame = first
-        with (output / 'ocupacao.csv').open('w', encoding='utf-8', newline='') as stream:
+        with ((output / 'ocupacao.csv').open('w', encoding='utf-8', newline='') as stream,
+              (output / 'eventos.csv').open('w', encoding='utf-8', newline='') as event_stream):
             log = csv.writer(stream)
             log.writerow(['quadro', 'tempo_video_s', 'vaga', 'estado', 'fracao_alterada'])
+            events = csv.writer(event_stream)
+            events.writerow(['quadro', 'tempo_video_s', 'vaga', 'estado_anterior', 'estado_atual'])
             while frame is not None:
+                frame_started = time.perf_counter()
                 results = detector.process(frame, instant=image_mode)
                 annotated = detector.annotate(frame, results)
+                if not image_mode:
+                    cv2.rectangle(annotated, (0, annotated.shape[0]-25),
+                                  (annotated.shape[1], annotated.shape[0]), (25,25,25), -1)
+                    cv2.putText(annotated, f'Quadro {frame_number} | tempo da fonte: {frame_number/fps:.2f}s',
+                                (10, annotated.shape[0]-8), cv2.FONT_HERSHEY_SIMPLEX, .45, (255,255,255), 1)
                 for result in results:
                     log.writerow([frame_number, round(frame_number / fps, 3), result['id'],
                                   result['state'], round(result['ratio'], 5)])
+                    before = previous_states[result['id']]
+                    if before != result['state']:
+                        events.writerow([frame_number, round(frame_number/fps, 3), result['id'],
+                                         before, result['state']])
+                        previous_states[result['id']] = result['state']
+                        event_count += 1
                 if image_mode:
                     write_image(output / 'imagem_anotada.png', annotated)
                 else:
                     writer.write(annotated)
-                write_image(output / 'ultimo_quadro.png', annotated)
                 frame_number += 1
                 if args.show:
-                    cv2.imshow('Vagas - Q para sair', annotated)
-                    if cv2.waitKey(0 if image_mode else 1) & 0xff == ord('q'):
+                    cv2.imshow(window, annotated)
+                    delay = max(1, round(1000/fps - 1000*(time.perf_counter()-frame_started)))
+                    key = cv2.waitKey(0 if image_mode else delay) & 0xff
+                    if key == ord(' ') and not image_mode:
+                        paused=annotated.copy()
+                        cv2.rectangle(paused,(0,paused.shape[0]-25),(paused.shape[1],paused.shape[0]),(25,25,25),-1)
+                        cv2.putText(paused,'PAUSADO | Espaco: continuar | Q/Esc: encerrar',
+                                    (10,paused.shape[0]-8),cv2.FONT_HERSHEY_SIMPLEX,.45,(0,220,255),1)
+                        cv2.imshow(window,paused)
+                        while True:
+                            key = cv2.waitKey(50) & 0xff
+                            if key in (ord(' '), ord('q'), ord('Q'), 27) or cv2.getWindowProperty(window,cv2.WND_PROP_VISIBLE)<1:
+                                break
+                    if key in (ord('q'), ord('Q'), 27) or cv2.getWindowProperty(window,cv2.WND_PROP_VISIBLE)<1:
+                        interrupted = True
                         break
                 if image_mode:
                     break
                 ok, frame = capture.read()
                 if not ok:
                     break
+        write_image(output / 'ultimo_quadro.png', annotated)
+        elapsed = time.perf_counter() - started
+        summary = {
+            'tipo_fonte': 'imagem' if image_mode else 'camera' if args.source.isdigit() else 'video',
+            'quadros_processados': frame_number,
+            'vagas_monitoradas': len(detector.spaces),
+            'fps_informado_fonte': None if image_mode else fps,
+            'duracao_fonte_processada_s': None if image_mode else round(frame_number/fps,6),
+            'contagem_final': {state: sum(r['state']==state for r in results)
+                               for state in ['livre','ocupada','indefinida']},
+            'eventos_confirmados': event_count,
+            'tempo_execucao_s': round(elapsed,6),
+            'quadros_por_segundo_execucao': round(frame_number/max(elapsed,1e-9),3),
+            'exibicao_interativa': args.show,
+            'interrompido_pelo_usuario': interrupted,
+            'nota_tempo': 'Tempo inclui processamento, exportacao e eventual exibicao/pausa. '
+                          'O tempo da fonte em camera depende do FPS informado pelo dispositivo.'
+        }
+        (output/'resumo.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         print(f'{frame_number} quadro(s) processado(s). Saída: {output.resolve()}')
         return frame_number
     finally:
