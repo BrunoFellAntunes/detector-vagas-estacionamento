@@ -14,7 +14,7 @@ py -m venv .venv
 .\.venv\Scripts\python.exe aplicativo.py
 ```
 
-Em Linux, use `python3 -m venv .venv`, `.venv/bin/python -m pip install -r requirements-app.txt` e `.venv/bin/python aplicativo.py`. A máquina precisa de uma sessão gráfica para mostrar a janela. Os testes automatizados também executam Qt em modo offscreen.
+Em Linux, use `python3 -m venv .venv`, `.venv/bin/python -m pip install -r requirements-app.txt` e `.venv/bin/python aplicativo.py`. A máquina precisa de uma sessão gráfica para mostrar a janela. No Ubuntu, o Qt também precisa da biblioteca EGL: `sudo apt-get install libegl1`. Os testes automatizados instalam essa biblioteca e executam Qt em modo offscreen.
 
 O programa analisa o vídeo completo ao abrir. Durante o processamento, os controles ficam desabilitados e os contadores mostram traços. Depois de conferir os 679 quadros, a janela abre pausada no quadro 60, aproximadamente dois segundos após o início. O botão **Reiniciar** permite observar os primeiros quadros em análise.
 
