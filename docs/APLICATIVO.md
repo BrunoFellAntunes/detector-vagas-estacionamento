@@ -43,6 +43,8 @@ Para reutilizar resultados completos de uma execução anterior:
 | Espaço | Aciona o botão com foco; com o vídeo em foco, alterna reprodução e pausa |
 | Sobre o projeto | Método, equipe, origem da filmagem, resultados e limitações |
 
+A navegação usa uma lateral azul-escura e os contadores destacam os totais do quadro atual. A lista mostra etiquetas de estado com texto e fundo colorido. Os controles reservam o mesmo contorno em repouso, seleção e foco, evitando deslocamentos durante a navegação.
+
 Verde significa **Livre**, vermelho significa **Ocupada** e amarelo significa **Em análise**. Os estados também aparecem por escrito. A área alterada é uma fração de pixels comparada à referência, não uma probabilidade de haver um carro.
 
 O histórico inclui somente mudanças confirmadas até o instante mostrado; as confirmações iniciais não são exibidas como entradas ou saídas. Buscar um instante anterior também recua o histórico. Ao terminar a gravação, Reproduzir começa novamente no início.

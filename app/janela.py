@@ -16,7 +16,6 @@ from app.modelo import LABELS,load_session
 from app.reproducao import PlaybackController
 
 APP_ROOT=Path(__file__).resolve().parent
-TEXT_COLORS={'livre':'#19734f','ocupada':'#b34f48','indefinida':'#966719'}
 
 
 def configure_application(application):
@@ -50,7 +49,7 @@ def label(text,name=None,wrap=False):
 def button(text,symbol=None,role=None):
     result=QPushButton(text)
     if role:result.setProperty('role',role)
-    if symbol:result.setIcon(icon(symbol,'#ffffff' if role=='primary' else '#3b5276'))
+    if symbol:result.setIcon(icon(symbol,'#ffffff' if role=='primary' else '#c5d3ea' if role=='nav' else '#3b5276'))
     result.setCursor(Qt.CursorShape.PointingHandCursor)
     return result
 
@@ -99,7 +98,7 @@ class MainWindow(QMainWindow):
     def _build(self):
         root=QWidget();root.setObjectName('root');self.setCentralWidget(root)
         overall=QHBoxLayout(root);overall.setContentsMargins(0,0,0,0);overall.setSpacing(0)
-        self.sidebar=QFrame();self.sidebar.setObjectName('sidebar');self.sidebar.setFixedWidth(180)
+        self.sidebar=QFrame();self.sidebar.setObjectName('sidebar');self.sidebar.setFixedWidth(196)
         side=QVBoxLayout(self.sidebar);side.setContentsMargins(18,25,18,18);side.setSpacing(10)
         side.addWidget(label('Vaga','brand'))
         side.addWidget(label('Monitoramento de\nestacionamento','brand_note'))
@@ -116,7 +115,7 @@ class MainWindow(QMainWindow):
         side.addWidget(self.history_empty)
         self.history_list=QListWidget();self.history_list.setObjectName('history')
         self.history_list.setAccessibleName('Alterações de ocupação até o quadro atual')
-        self.history_list.setFixedHeight(148)
+        self.history_list.setFixedHeight(166)
         self.history_list.itemClicked.connect(self.jump_to_event)
         side.addWidget(self.history_list)
         side.addSpacing(15)
@@ -140,7 +139,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(head)
 
         self.metric_strip=QFrame();self.metric_strip.setObjectName('metrics')
-        metrics=QHBoxLayout(self.metric_strip);metrics.setContentsMargins(20,9,20,9);metrics.setSpacing(18)
+        metrics=QHBoxLayout(self.metric_strip);metrics.setContentsMargins(22,14,22,14);metrics.setSpacing(18)
         self.free_value=self._metric(metrics,'Livres','metric_free')
         self._divider(metrics)
         self.occupied_value=self._metric(metrics,'Ocupadas','metric_occupied')
@@ -156,7 +155,7 @@ class MainWindow(QMainWindow):
         video_panel=QFrame();video_panel.setObjectName('video_panel')
         vl=QVBoxLayout(video_panel);vl.setContentsMargins(12,12,12,12);vl.setSpacing(9)
         video_head=QHBoxLayout();video_head.addWidget(label('Visão do estacionamento','section_title'))
-        video_head.addStretch(1);video_head.addWidget(label('Vídeo de terceiros','small'))
+        video_head.addStretch(1);video_head.addWidget(label('Vídeo de terceiros','source_badge'))
         vl.addLayout(video_head)
         self.video=VideoCanvas();self.video.space_clicked.connect(self.select_space)
         vl.addWidget(self.video,1)
@@ -198,14 +197,18 @@ class MainWindow(QMainWindow):
         self.rows_layout=QVBoxLayout();self.rows_layout.setSpacing(7);sl.addLayout(self.rows_layout)
         self.empty_spaces=label('Nenhuma vaga neste estado no quadro atual.','muted',True);self.empty_spaces.hide()
         sl.addWidget(self.empty_spaces)
-        self.selection_detail=label('Selecione uma vaga para destacá-la no vídeo.','small',True)
+        self.selection_detail=label('Selecione uma vaga para destacá-la no vídeo.','selection_detail',True)
         self.selection_detail.setMinimumHeight(40);sl.addWidget(self.selection_detail);sl.addStretch(1)
         self.export_button=button('Exportar resultados','download');self.export_button.clicked.connect(self.export_results)
         sl.addWidget(self.export_button)
         body.addWidget(spaces_panel)
         self.stack.addWidget(monitor)
-        self.about=QTextBrowser();self.about.setOpenExternalLinks(True);self.about.setAccessibleName('Descrição e resultados do projeto')
-        self.stack.addWidget(self.about)
+        about_panel=QFrame();about_panel.setObjectName('about_panel')
+        about_layout=QHBoxLayout(about_panel);about_layout.setContentsMargins(12,10,12,10);about_layout.setSpacing(0)
+        self.about=QTextBrowser();self.about.setMaximumWidth(800)
+        self.about.setOpenExternalLinks(True);self.about.setAccessibleName('Descrição e resultados do projeto')
+        about_layout.addWidget(self.about,1);about_layout.addStretch(0)
+        self.stack.addWidget(about_panel)
         layout.addWidget(self.stack,1)
         footer=QHBoxLayout();self.footer=QWidget();self.footer.setLayout(footer);footer.setContentsMargins(0,0,0,0)
         footer.addWidget(label('Robótica e Visão Computacional','small'));footer.addStretch(1)
@@ -226,7 +229,7 @@ class MainWindow(QMainWindow):
         return value
 
     def _divider(self,layout):
-        divider=QFrame();divider.setObjectName('divider');divider.setFixedSize(1,36);layout.addWidget(divider)
+        divider=QFrame();divider.setObjectName('divider');divider.setFixedSize(1,44);layout.addWidget(divider)
 
     def _enable_controls(self,enabled):
         for widget in self.control_widgets:widget.setEnabled(enabled)
@@ -278,7 +281,9 @@ class MainWindow(QMainWindow):
             name=result['id'];state=result['state']
             if self._state_cache.get(name)!=state:
                 self.state_labels[name].setText(LABELS[state])
-                self.state_labels[name].setStyleSheet(f'color: {TEXT_COLORS[state]};')
+                state_label=self.state_labels[name]
+                state_label.setProperty('state',state)
+                state_label.style().unpolish(state_label);state_label.style().polish(state_label)
                 self.space_rows[name].setAccessibleName(f'Vaga {name}: {LABELS[state]}. Clique para destacar.')
                 self._state_cache[name]=state
         self._apply_filter()
@@ -372,7 +377,8 @@ class MainWindow(QMainWindow):
         self.history_empty.setText('As mudanças aparecem conforme o vídeo avança.')
         self.selection_detail.setText('Aguardando a conclusão da análise.')
         for state_label in self.state_labels.values():
-            state_label.setText('Aguardando');state_label.setStyleSheet('color:#596d82;')
+            state_label.setText('Aguardando');state_label.setProperty('state',None)
+            state_label.style().unpolish(state_label);state_label.style().polish(state_label)
         self._update_about()
         self.video.clear('Analisando a gravação','O detector está conferindo os 679 quadros do vídeo.')
         for value in [self.free_value,self.occupied_value,self.unknown_value]:value.setText('—')
