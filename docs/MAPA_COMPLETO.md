@@ -39,6 +39,8 @@ Os cinco indefinidos pertencem à amostra do quadro zero, antes da inicializaç�
 
 O histórico completo também contém falsas mudanças de V55 durante passagem de pessoas/sombras: livre → ocupada → livre nos intervalos 126–140 e 443–512. A amostra pontual de 191 rótulos não captura todos os erros ao longo do vídeo; não apresentar sua concordância como precisão integral de cada decisão.
 
+Os instantes acima são da execução Windows registrada. Na execução Linux dos testes, V01 foi confirmada no quadro 117 em vez de 118. As duas plataformas podem produzir pequenas diferenças na análise da imagem; o histórico sempre busca o índice efetivamente gravado em `eventos.csv`.
+
 ## Limites e reprodução
 
 Regiões, parâmetros e avaliação usam o mesmo clipe. A amostra não é validação independente nem mede generalização. Textura não reconhece semanticamente um automóvel: pessoas, sombras e marcas do piso podem gerar falsos positivos; veículos lisos e saídas parciais podem gerar falsos negativos. A câmera deve permanecer fixa.

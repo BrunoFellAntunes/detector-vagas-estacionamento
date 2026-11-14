@@ -103,8 +103,10 @@ class AppWindowTests(unittest.TestCase):
         self.window.controller.seek(200)
         self.assertEqual(self.window.history_list.count(),4)
         item=self.window.history_list.item(3)
+        event=item.data(Qt.ItemDataRole.UserRole)
+        self.assertEqual(event['space'],'V01')
         self.window.jump_to_event(item)
-        self.assertEqual(self.window.controller.index,118)
+        self.assertEqual(self.window.controller.index,event['frame'])
         self.assertEqual(self.window.video.selected_space,'V01')
 
     def test_presentation_restores_normal_window_and_overlay_toggle(self):
