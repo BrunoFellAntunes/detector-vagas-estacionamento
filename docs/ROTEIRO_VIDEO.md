@@ -27,17 +27,17 @@ Mostrar uma foto autorizada do contexto e o objetivo do projeto. Transição: �
 
 ## Pedro Toigo explica a solução
 
-Mostrar brevemente `detector.py` e o diagrama verbal: câmera fixa → tons de cinza e suavização → diferença para referência vazia → máscara de cada vaga → fração de pixels alterados → confirmação temporal → contagem e registro.
+Mostrar brevemente `detector.py` e o diagrama verbal: câmera fixa → tons de cinza e suavização → limiarização adaptativa → mediana e dilatação → densidade de textura por vaga → confirmação temporal → contagem e registro.
 
-Fala central: “Usamos Python, OpenCV e NumPy, com PySide6 para a janela nativa. Não treinamos uma rede neural. Cadastramos as vagas manualmente e medimos quanto sua aparência muda em relação a uma imagem vazia. O valor exibido é uma fração de pixels alterados, não uma probabilidade de haver um carro.”
+Fala central: “Usamos Python, OpenCV e NumPy, com PySide6 para a janela nativa. Não treinamos uma rede neural. Cadastramos manualmente 68 vagas e medimos textura em cada região. O valor não é uma probabilidade de haver um carro. O modo anterior por referência vazia também permanece disponível.”
 
-Explicar os dois limiares e os cinco quadros de confirmação. Justificar a referência fixa: um veículo que permanece parado deve continuar sendo percebido como ocupação. Explicar que alterações de sombra também podem causar erro. Transição: “Agora vamos executar o programa e acompanhar o que acontece em cada vaga.”
+Explicar os dois limiares e os cinco quadros de confirmação. Explicar por que não se usa o último quadro como fundo vazio global: muitos carros continuam estacionados. A textura permite analisar esses carros parados, com limitações. Explicar que alterações de sombra também podem causar erro. Transição: “Agora vamos executar o programa e acompanhar o que acontece em cada vaga.”
 
 ## Bruno Fell Antunes inicia a demonstração
 
-Mostrar a referência vazia e o arquivo de polígonos. Abrir a calibração, selecionar uma vaga, confirmar e explicar como o JSON registra a resolução e as coordenadas. Usar uma cópia de configuração no ensaio para preservar a versão demonstrada.
+Mostrar vagas_completas_carpark.json e como os quatro cantos delimitam cada vaga. Identificar os seis setores e as exclusões de ilhas, corredores e obstáculo central. Usar uma cópia da configuração caso se demonstre a ferramenta de cadastro manual.
 
-Abrir `INICIAR_APLICATIVO.bat`, aguardar a análise e mostrar a janela Vaga com dois estados livres e três ocupados. Mostrar Reprocessar, que executa novamente o detector, e o botão Reproduzir. Explicar o significado de verde, vermelho e amarelo. Demonstrar que a contagem acompanha os estados e que uma alteração fora de uma região não deveria mudar aquela vaga.
+Abrir `INICIAR_APLICATIVO.bat`, aguardar a análise e mostrar a janela Vaga com 11 estados livres e 57 ocupados. Mostrar Reprocessar, que executa novamente o detector, e o botão Reproduzir. Explicar o significado de verde, vermelho e amarelo. Demonstrar que a contagem acompanha os estados e que uma alteração fora de uma região não deveria mudar aquela vaga.
 
 Para ensaiar com dados simulados:
 
@@ -46,13 +46,13 @@ Para ensaiar com dados simulados:
 .\.venv\Scripts\python.exe detector.py --source dados/cena_simulada.png --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/imagem --show
 ```
 
-O exemplo real já cadastrado abre em uma janela nativa com `.\.venv\Scripts\python.exe aplicativo.py`. O comando `executar_exemplo.py --show` continua disponível para demonstrar o detector diretamente. Ele monitora cinco regiões do vídeo de terceiros; explicar a origem, a referência do quadro 678 e a seleção das regiões conforme `EXPERIMENTO_REAL.md`. Na interface Vaga, usar Reproduzir/Pausar e a barra de posição para explicar as saídas. O botão Apresentar abre tela cheia; Esc retorna à janela. Veja [APLICATIVO.md](APLICATIVO.md) para o percurso de ensaio. Para uma gravação própria, seguir `COLETA_REAL.md`. Mostrar o comando completo e pelo menos um trecho do processamento. A demonstração deve usar o mesmo código publicado no GitHub.
+O exemplo real já cadastrado abre em uma janela nativa com `.\.venv\Scripts\python.exe aplicativo.py`. O comando `executar_exemplo.py --completo --show` continua disponível para demonstrar o detector diretamente. Ele monitora 68 vagas do vídeo de terceiros; explicar a origem, o mapa e os limiares conforme `MAPA_COMPLETO.md`. A imagem do quadro 678 não é um fundo vazio das 68 vagas. Na interface Vaga, usar Reproduzir/Pausar e a barra de posição para explicar as saídas. O botão Apresentar abre tela cheia; Esc retorna à janela. Veja [APLICATIVO.md](APLICATIVO.md) para o percurso de ensaio. Para uma gravação própria, seguir `COLETA_REAL.md`. Mostrar o comando completo e pelo menos um trecho do processamento. A demonstração deve usar o mesmo código publicado no GitHub.
 
 ## Edson Leandro Soares continua a demonstração
 
-Na gravação externa, mostrar as saídas de V01, V02 e V03, confirmadas nos quadros 147, 222 e 361. Essa gravação não contém entradas nas cinco regiões monitoradas; para demonstrar uma entrada, usar a simulação identificada ou a coleta própria. Destacar os cinco quadros de confirmação e o pequeno atraso introduzido. Mostrar um veículo parado mantendo o estado ocupado. Se a coleta tiver falhas com sombras, mostrar um exemplo e explicar a limitação.
+Na gravação externa, mostrar as saídas de V01, V02 e V03, confirmadas nos quadros 118, 172 e 370. Essa gravação não contém entradas de veículos estacionando; para demonstrar uma entrada, usar a simulação identificada ou a coleta própria. Destacar os cinco quadros de confirmação e explicar que liberação parcial de uma vaga pode ser indicada antes da saída física completa. Mostrar um veículo parado mantendo o estado ocupado. Se a coleta tiver falhas com sombras, mostrar um exemplo e explicar a limitação.
 
-Na janela Vaga, selecionar uma vaga, aplicar Somente livres e voltar a uma mudança pelo histórico. Usar Exportar resultados, extrair o ZIP, abrir `ocupacao.csv` e explicar quadro, tempo estimado, vaga, estado e fração alterada. Abrir o vídeo exportado. Não apresentar o FPS do arquivo como velocidade medida do algoritmo.
+Na janela Vaga, selecionar uma vaga, aplicar Somente livres e voltar a uma mudança pelo histórico. Usar Exportar resultados, extrair o ZIP, abrir `ocupacao.csv` e explicar quadro, tempo estimado, vaga, estado e densidade de textura. Abrir o vídeo exportado. Não apresentar o FPS do arquivo como velocidade medida do algoritmo.
 
 Para ensaio reproduzível:
 
@@ -69,7 +69,7 @@ Vitor: relatar os resultados reais medidos e retomar o objetivo de apresentar di
 
 Pedro: explicar uma dificuldade técnica efetivamente observada, como alinhamento da câmera, limiares ou oscilação entre quadros. Evitar relatar problemas que o grupo não verificou.
 
-Bruno: comentar referência vazia, sombras, oclusão e mudança de iluminação. Como melhorias, propor calibração por condição de luz, avaliação com mais sequências ou comparação com um classificador treinado. Identificar propostas como trabalho futuro.
+Bruno: comentar veículos lisos, pedestres, sombras, oclusão e mudança de iluminação. Mostrar os erros de V55 registrados no histórico. Como melhorias, propor calibração por condição de luz, avaliação com mais sequências ou comparação com um classificador treinado. Identificar propostas como trabalho futuro.
 
 Edson: concluir o que foi demonstrado e mostrar o repositório público. Informar que a reprodução está descrita no README e encerrar antes de dez minutos. Não inventar endereço do YouTube antes de publicar.
 

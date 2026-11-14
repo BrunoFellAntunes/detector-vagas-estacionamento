@@ -1,44 +1,22 @@
-# Monitoramento inteligente de vagas de estacionamento
+# Monitoramento de vagas de estacionamento
 
 [![Testes do projeto](https://github.com/VitorRodi/detector-vagas-estacionamento/actions/workflows/testes.yml/badge.svg)](https://github.com/VitorRodi/detector-vagas-estacionamento/actions/workflows/testes.yml)
 
-Projeto acadêmico para a disciplina de Robótica e Visão Computacional, Unochapecó, docente Wagner Titon.
+Projeto acadêmico de Robótica e Visão Computacional da Unochapecó, docente Wagner Titon. Grupo: Vitor Rodi, Pedro Toigo, Bruno Fell Antunes e Edson Leandro Soares.
 
-Grupo: Vitor Rodi, Pedro Toigo, Bruno Fell Antunes e Edson Leandro Soares.
+## Problema e situação atual
 
-## Problema e proposta
+A proposta é facilitar a consulta à disponibilidade de vagas a partir de uma câmera fixa. O aplicativo apresenta uma gravação de terceiros com **68 vagas visíveis cadastradas**, cada uma com um retângulo, identificador e estado. Ilhas, corredores, o obstáculo central e regiões fora do enquadramento ficam fora da contagem.
 
-O projeto investiga a dificuldade de consultar rapidamente quais vagas de um estacionamento estão disponíveis. A proposta é analisar regiões de uma câmera fixa e apresentar uma indicação visual de ocupação que possa ajudar motoristas e responsáveis pelo local. O estacionamento específico, as observações e as entrevistas ainda precisam ser registrados pelo grupo; não há medição de redução de tempo de procura.
+![Aplicativo com as 68 vagas marcadas](assets/aplicativo.png)
 
-## Situação atual
-
-O protótipo foi verificado com dados simulados e executa uma demonstração com cinco vagas cadastradas em uma filmagem real de terceiros. A amostra visualmente rotulada do clipe permite uma conferência exploratória; não representa validação independente em outros estacionamentos. A coleta própria e a avaliação em outras gravações são acompanhadas nas [issues do projeto](https://github.com/VitorRodi/detector-vagas-estacionamento/issues). O vídeo final do grupo ainda não foi gravado ou publicado. A entrega exigida é um link do YouTube acessível e este repositório público.
-
-![Aplicativo Vaga: vídeo e disponibilidade de cinco vagas monitoradas](assets/aplicativo.png)
-
-A janela nativa apresenta contadores, seleção e filtros por estado, histórico de alterações, reprodução com busca e velocidade ajustável, tela cheia e exportação dos resultados. Depois da instalação, funciona localmente sem internet. A demonstração usa uma gravação incluída no projeto.
-
-## Tecnologias e método
-
-Python 3.10 ou mais recente, NumPy, OpenCV e PySide6 (Qt para a interface). O método utiliza tons de cinza, filtro gaussiano, diferença absoluta contra uma referência vazia, limiarização, abertura morfológica, máscaras poligonais e confirmação temporal. **Não utiliza modelo treinado, rede neural ou pesos externos.**
-
-## O que funciona
-
-- Cadastro manual de vagas como quadriláteros convexos.
-- Comparação com uma foto fixa em que **todas as vagas cadastradas estejam vazias**.
-- Classificação por fração de pixels alterados, com dois limiares e confirmação temporal.
-- Entrada por imagem, vídeo ou câmera local; marcação por cores e contagem de estados.
-- Interface nativa com contagem sincronizada ao quadro, filtros, seleção e histórico.
-- Exportação de CSV, imagem ou vídeo anotado e pacote ZIP dos resultados.
-- Demonstração simulada reproduzível e testes de comportamento.
-
-Este programa mede alterações de aparência. Não reconhece semanticamente carros e pode confundir sombras, pessoas e objetos com ocupação. Não foi validado em estacionamento real.
+A demonstração está implementada, mas a investigação de campo, as gravações próprias e a avaliação em vídeos independentes ainda precisam ser realizadas. Não foi medida redução de tempo de procura. O vídeo final do grupo ainda precisa ser gravado e publicado no YouTube, com participação verbal dos quatro integrantes e duração de até dez minutos.
 
 ## Abrir o aplicativo no Windows
 
-Com Python 3.10 ou mais recente instalado, dê dois cliques em **[INICIAR_APLICATIVO.bat](INICIAR_APLICATIVO.bat)**. O iniciador cria o ambiente local e instala as dependências se necessário; essa primeira instalação precisa de internet. Em seguida, abre a janela e processa os 679 quadros da gravação. Aguarde a mensagem de análise pronta e clique em **Reproduzir**.
+Com Python 3.10 ou mais recente instalado, extraia o projeto e dê dois cliques em **[INICIAR_APLICATIVO.bat](INICIAR_APLICATIVO.bat)**. O iniciador cria `.venv` e instala as dependências se necessário; essa primeira instalação precisa de internet. Aguarde o processamento dos 679 quadros e clique em **Reproduzir**. Depois da instalação, a demonstração funciona com os arquivos locais, sem internet.
 
-Para instalar e abrir pelo terminal:
+Alternativa pelo terminal na raiz do projeto:
 
 ```powershell
 py -m venv .venv
@@ -46,121 +24,102 @@ py -m venv .venv
 .\.venv\Scripts\python.exe aplicativo.py
 ```
 
-Use **Apresentar** ou F11 para tela cheia; Esc sai da tela cheia; na janela normal, pausa a reprodução. O filtro mostra vagas livres, ocupadas ou em análise; clicar em uma vaga destaca sua região. O histórico permite voltar ao quadro de uma alteração. **Reprocessar** executa o detector novamente e **Exportar resultados** salva um ZIP. Os contadores sempre incluem as cinco vagas monitoradas, mesmo com um filtro aplicado.
-
-Para abrir uma análise completa já salva, use `.\.venv\Scripts\python.exe aplicativo.py --usar-resultados`. Os controles, arquivos e solução de problemas estão em [docs/APLICATIVO.md](docs/APLICATIVO.md).
-
-## Executar o detector pelo terminal
-
-A interface é opcional. Para usar apenas o detector, abra o terminal **nesta pasta**, com Python 3.10 ou mais recente:
+Para abrir uma análise completa já salva, use:
 
 ```powershell
-py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe executar_exemplo.py --show
+.\.venv\Scripts\python.exe aplicativo.py --usar-resultados
 ```
 
-Esse comando processa o vídeo real incluído, usa a referência e as cinco regiões cadastradas, exporta os resultados e avalia a amostra de 60 rótulos visuais. A janela permite pausar com espaço e sair com Q ou Esc. Sem `--show`, a execução não abre janela. Para conhecer a seleção das vagas e as limitações dessa avaliação, leia [o experimento real](docs/EXPERIMENTO_REAL.md).
+A janela oferece contadores sincronizados, filtros, seleção de vagas pelo vídeo ou pela lista com rolagem, histórico, busca, velocidade, tela cheia e exportação ZIP. As marcações usam verde para livre, vermelho para ocupada e amarelo para em análise. No mapa completo, as etiquetas ficam compactas; a vaga selecionada mostra seu estado por extenso.
 
-Para repetir a demonstração simulada:
+**Apresentar** ou F11 abre a tela cheia. Esc sai da tela cheia; na janela normal, pausa a reprodução. O filtro altera somente a lista: os contadores continuam incluindo as 68 vagas. Veja [o guia do aplicativo](docs/APLICATIVO.md).
+
+## Tecnologias e funcionamento
+
+Python, NumPy e OpenCV fazem o processamento; PySide6/Qt implementa a janela nativa. Não há rede neural, treinamento ou pesos externos. Há dois experimentos:
+
+| Modo | Regiões | Medida | Execução |
+|---|---:|---|---|
+| Mapa completo, padrão do aplicativo | 68 | Densidade de textura dentro de cada vaga | `executar_exemplo.py --completo` |
+| Experimento anterior por referência | 5 | Fração de pixels diferentes de uma referência vazia | `executar_exemplo.py` |
+
+No mapa completo, o vídeo não contém um quadro em que todas as vagas estejam vazias. Comparar todas as regiões com o último quadro faria carros parados parecerem vagas livres. Por isso, o modo completo usa tons de cinza, suavização, limiarização adaptativa, mediana e dilatação para medir textura. Dois limiares e cinco quadros consecutivos confirmam o estado. Essa heurística depende do enquadramento e pode confundir pedestres, sombras, marcas do piso e veículos com pouca textura.
+
+As regiões e os parâmetros foram escolhidos no mesmo clipe usado para avaliar. Os resultados são exploratórios e **não demonstram precisão em outros estacionamentos**. O índice de textura não é probabilidade de ocupação. A técnica por referência vazia continua disponível e exige que todas as regiões nela cadastradas estejam vazias na referência.
+
+## Executar sem a interface
+
+Instale `requirements.txt` para usar somente os programas OpenCV. Com as dependências instaladas:
 
 ```powershell
-.\.venv\Scripts\python.exe demo.py
-.\.venv\Scripts\python.exe detector.py --source dados/cena_simulada.png --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/imagem
-.\.venv\Scripts\python.exe detector.py --source dados/video_simulado.mp4 --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/video
+.\.venv\Scripts\python.exe executar_exemplo.py --completo
+.\.venv\Scripts\python.exe executar_exemplo.py --completo --show
 ```
 
-As saídas do exemplo real ficam em `resultados/carpark/`; as da simulação ficam em `resultados/imagem/` e `resultados/video/`. Os dados de entrada simulados estão versionados e podem ser regenerados. Em Linux e macOS, crie o ambiente com `python3 -m venv .venv` e use `.venv/bin/python` nos mesmos comandos.
+A segunda opção abre a janela simples do OpenCV: espaço pausa e Q/Esc encerra. Para demonstrar a interface completa, use `aplicativo.py`.
 
-Cada execução exporta `ocupacao.csv`, `eventos.csv`, `resumo.json` e `ultimo_quadro.png`, além de imagem ou vídeo anotado. O exemplo real também gera `avaliacao.json`. Os eventos incluem a confirmação do estado inicial e as mudanças posteriores. O resumo registra o tempo total de execução, que inclui exportação e eventual reprodução e pausa; com janela aberta, sua taxa não é um benchmark isolado do algoritmo. A avaliação completa é omitida se a reprodução for encerrada pelo usuário antes do fim.
-
-## Usar imagens reais
-
-### Vídeo externo incluído
-
-[Abrir carPark.mp4](dados/terceiros/carPark.mp4): filmagem de estacionamento com 679 quadros, 24 FPS, resolução de 1100 × 720 e duração aproximada de 28,29 segundos. O arquivo foi obtido do projeto de [Harsh Bafna](https://github.com/harshbafnaa/car-parking-detection). Os créditos, a declaração de licença na fonte e a revisão utilizada estão em [docs/FONTES_MIDIA.md](docs/FONTES_MIDIA.md); a integridade e as características do arquivo estão em [carPark.metadata.json](dados/terceiros/carPark.metadata.json).
-
-O arquivo é uma gravação externa. Para reproduzir o experimento, usem `executar_exemplo.py`, que utiliza `referencia_carpark.png` e `vagas_carpark.json`. Foram selecionadas cinco regiões internas que estão vazias no quadro 678; as outras vagas visíveis não são monitoradas. Não usem o JSON da simulação neste vídeo. Os parâmetros iniciais foram mantidos; a escolha das regiões e da referência foi feita no próprio clipe, o que limita a interpretação dos resultados.
-
-### Gravação e calibração
-
-1. Siga o [guia de gravação](docs/COLETA_REAL.md), fixe a câmera e mantenha a mesma posição, foco e resolução. Guarde os vídeos locais em `dados/reais/`, que não é publicado automaticamente.
-2. Localize no vídeo um quadro com **todas as vagas que serão cadastradas vazias**. Extraia esse quadro na resolução original. Não presuma que o primeiro quadro esteja vazio:
+Para repetir o experimento anterior de cinco regiões em outra pasta de saída:
 
 ```powershell
-.\.venv\Scripts\python.exe extrair_referencia.py --video dados/reais/video_real.mp4 --quadro 0 --output dados/reais/referencia.png --confirmar-vagas-vazias
+.\.venv\Scripts\python.exe executar_exemplo.py --output resultados/referencia
 ```
 
-O exemplo usa o quadro zero. Troque o índice se necessário e confirme visualmente a ausência de veículos nas vagas a cadastrar. A opção de confirmação exige essa revisão humana; o programa não verifica automaticamente que a cena está vazia.
+Em Linux, crie o ambiente com `python3 -m venv .venv` e use `.venv/bin/python`. A janela precisa de sessão gráfica; no Ubuntu, instale também `libegl1`. O modo completo sem `--show` não abre janela.
 
-3. Cadastre os quatro cantos de cada vaga, em ordem ao redor do contorno:
+## Dados, mapa e resultados
 
-```powershell
-.\.venv\Scripts\python.exe calibrar.py --reference dados/reais/referencia.png --output dados/reais/vagas.json
-```
+O arquivo [carPark.mp4](dados/terceiros/carPark.mp4) contém 679 quadros, 24 FPS, resolução de 1100 × 720 e duração aproximada de 28,29 segundos. Foi obtido do repositório de [Harsh Bafna](https://github.com/harshbafnaa/car-parking-detection). A fonte, a declaração de licença disponível, a revisão e os limites de atribuição estão em [FONTES_MIDIA.md](docs/FONTES_MIDIA.md).
 
-Clique quatro vezes, pressione N para confirmar a vaga, U para desfazer, S para salvar após confirmar todas as vagas ou Esc para cancelar. A janela pode ser redimensionada. Esta interface foi revisada em código; a interação por mouse precisa ser confirmada no computador do grupo.
+O mapa está em [vagas_completas_carpark.json](dados/terceiros/vagas_completas_carpark.json). São seis colunas de vagas; os identificadores V01–V05 preservam as posições do experimento anterior. Os demais vão até V68. Cada região registra setor, linha e coordenadas. Consulte [MAPA_COMPLETO.md](docs/MAPA_COMPLETO.md) para o procedimento e as limitações.
 
-4. Execute sobre vídeo da **mesma câmera e enquadramento**:
+A execução completa gera **46.172 decisões**. No quadro 60, há 11 estados livres e 57 ocupados; no último quadro, 14 livres e 54 ocupados. Esses números são saídas do detector, não prova de funcionamento em campo.
 
-```powershell
-.\.venv\Scripts\python.exe detector.py --source dados/reais/video_real.mp4 --reference dados/reais/referencia.png --config dados/reais/vagas.json --output resultados/real --show
-```
+A amostra rotulada tem 191 pares de quadro e vaga, cobrindo todas as 68 vagas em dois quadros e a amostra anterior. Foram 183 concordantes, cinco indefinidos e três divergentes: **95,81% de concordância total e 97,38% de cobertura**. Regiões e limiares foram calibrados neste mesmo vídeo. A matriz e os erros estão documentados em [MAPA_COMPLETO.md](docs/MAPA_COMPLETO.md). O relatório anterior de cinco vagas está preservado em [EXPERIMENTO_REAL.md](docs/EXPERIMENTO_REAL.md).
 
-Para câmera local, use `--source 0`. Câmeras e a interação de calibração dependem de hardware e não foram exercitadas nesta entrega.
+## Exportações e parâmetros
 
-## Parâmetros em JSON
+As saídas padrão ficam em `resultados/carpark/`: `ocupacao.csv`, `eventos.csv`, `resumo.json`, `avaliacao.json`, `ultimo_quadro.png` e `video_anotado.mp4`. O aplicativo exporta esses resultados em ZIP. Eles representam a análise completa, independentemente do filtro ou instante exibido.
 
-`pixel_threshold=25`: diferença mínima em escala de cinza (0 a 255). `occupied_ratio=0.20`: proporção alterada a partir da qual a vaga candidata passa a ocupada. `free_ratio=0.10`: proporção até a qual passa a livre. Entre esses limites, mantém o estado anterior; sem estado anterior fica indefinida. `stable_frames=5`: número de quadros consecutivos para confirmar uma mudança. Em imagem estática a classificação é imediata, sem confirmação temporal.
+CSV de ocupação: `quadro`, `tempo_video_s`, `vaga`, `estado` e `densidade_textura` no modo completo. No modo por referência, a última coluna é `fracao_alterada`. O resumo registra o método e o total de vagas. Eventos incluem confirmações iniciais e mudanças posteriores; o histórico da janela omite a inicialização.
 
-Estes valores são iniciais. Ajuste-os com um conjunto de calibração e avalie em outro conjunto. Não altere a referência automaticamente: incorporar um carro parado ao fundo pode levar a classificá-lo como vaga livre. O percentual exibido é a fração de pixels alterados, **não uma probabilidade nem confiança de IA**.
+No modo completo, a configuração usa bloco adaptativo 25, constante 16, mediana 5 × 5, dilatação 3 × 3 e margem interna de três pixels. Os limiares gerais são livre até 0,11 e ocupada a partir de 0,12. V06 e V18 têm limiares locais 0,05/0,065 por conterem vans com superfícies lisas; continuam podendo mudar de estado conforme a imagem. Entre os limiares, mantém-se o estado anterior; sem confirmação, permanece em análise. Em imagem estática, o estado é calculado imediatamente.
 
-CSV: `quadro`, `tempo_video_s`, `vaga`, `estado`, `fracao_alterada`. O tempo é calculado a partir do FPS informado pelo arquivo; em câmera ao vivo é estimado, não representa relógio de captura.
+Os resultados antigos são invalidados ao iniciar uma nova execução. Vídeo interrompido não deve ser avaliado como completo. O tempo do resumo inclui processamento, exportação e eventual exibição/pausa; não é um benchmark isolado do algoritmo.
 
-## Verificação
+## Testar e repetir a simulação
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe demo.py
+.\.venv\Scripts\python.exe detector.py --source dados/video_simulado.mp4 --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/video
 .\.venv\Scripts\python.exe verificar_demo.py
 ```
 
-A suíte completa contém 36 testes, incluindo execução do vídeo real a partir de outra pasta, rejeição de clipes incompletos, sincronização de estados, navegação, reprodução, recuperação após falha de leitura, exportação e encerramento do processamento na janela. Instale `requirements-app.txt` para executar também os testes de Qt; com somente `requirements.txt`, esses testes são omitidos. Rode `verificar_demo.py` depois de gerar e processar o vídeo simulado. A simulação possui 240 quadros, 6 vagas e 1.440 decisões: 1.408 concordantes com o gabarito, 24 indefinidas na inicialização e 8 divergentes durante a confirmação de transições. A concordância de 97,78% descreve **apenas essa simulação**, não a precisão em campo. O verificador reabre o vídeo anotado, decodifica seus 240 quadros e gera `resultados/verificacao_demo.json`. O GitHub Actions repete a suíte e os cenários simulado e real em Windows e Linux.
+A suíte completa tem 43 testes. Instale `requirements-app.txt` para incluir os testes reais de widgets Qt; com somente `requirements.txt`, os testes de Qt são omitidos. A suíte cobre textura, referência, confirmação temporal, avaliação, exportação, reprodução, erros, cancelamento e seleção da última vaga pela rolagem. GitHub Actions executa em Windows e Linux e repete os vídeos simulado, completo e anterior.
 
-No clipe real, os 679 quadros geram 3.395 decisões sobre cinco regiões. A amostra rotulada contém 60 pares de quadro e vaga: 54 concordantes, cinco indefinidos na inicialização e um falso positivo na confirmação de uma saída. A concordância total da amostra é 90%, e a cobertura é 91,67%. Os detalhes e a matriz de confusão estão em [EXPERIMENTO_REAL.md](docs/EXPERIMENTO_REAL.md). Não extrapolar essas medidas para outros vídeos.
+A simulação tem 240 quadros e seis vagas: 1.408 de 1.440 decisões concordantes, 24 indefinidas na inicialização e oito divergentes durante a confirmação temporal. A concordância de 97,78% descreve somente essa simulação.
 
-## Estrutura
+## Gravar e cadastrar outro estacionamento
 
-```text
-aplicativo.py               Janela nativa de apresentação
-INICIAR_APLICATIVO.bat      Iniciador do aplicativo no Windows
-app/                       Interface, reprodução e leitura dos resultados
-detector.py                 Classificação, anotação e exportação
-calibrar.py                 Cadastro manual das vagas
-demo.py                     Geração do cenário simulado e do gabarito
-extrair_referencia.py       Extração de quadro para calibração real
-verificar_demo.py           Conferência independente da saída simulada
-executar_exemplo.py         Execução e avaliação do vídeo real em um comando
-avaliar.py                  Métricas a partir de rótulos por quadro e vaga
-requirements.txt           Dependências do detector
-requirements-app.txt       Dependências da interface nativa
-tests/                     Testes de comportamento
-dados/                     Entradas simuladas reproduzíveis
-dados/terceiros/            Filmagem externa e registro de origem
-assets/                    Imagem da demonstração
-docs/COLETA_REAL.md         Como gravar e registrar imagens reais
-docs/APLICATIVO.md          Instalação, controles e apresentação na janela
-docs/ROTEIRO_VIDEO.md       Roteiro com participação dos quatro integrantes
-docs/ENTREGA.md             Critérios e conferência dos links finais
-docs/EXPERIMENTO_REAL.md    Regiões, rótulos, resultados e limitações
-.github/workflows/         Execução automática dos testes
+Siga [COLETA_REAL.md](docs/COLETA_REAL.md) e mantenha câmera, foco, resolução e posição fixos. O mapa incluído serve somente a esta filmagem. O modo por referência exige um quadro com todas as vagas cadastradas vazias; a extração requer confirmação humana:
+
+```powershell
+.\.venv\Scripts\python.exe extrair_referencia.py --video dados/reais/video_real.mp4 --quadro 0 --output dados/reais/referencia.png --confirmar-vagas-vazias
+.\.venv\Scripts\python.exe calibrar.py --reference dados/reais/referencia.png --output dados/reais/vagas.json
+.\.venv\Scripts\python.exe detector.py --source dados/reais/video_real.mp4 --reference dados/reais/referencia.png --config dados/reais/vagas.json --output resultados/real --show
 ```
 
-## Pendências acadêmicas
+Troque o quadro zero por um índice visualmente conferido. Na calibração, clique quatro cantos, N confirma, U desfaz, S salva e Esc cancela. Para câmera local, use `--source 0`. Câmera física e calibração manual por mouse ainda dependem do ensaio no equipamento do grupo. Os limiares do modo por textura precisam ser recalibrados e avaliados em outra sequência antes de usar outro local.
 
-Definir o estacionamento da investigação própria; concluir a observação/entrevista prevista na etapa 1; obter gravações próprias autorizadas; avaliar em sequências independentes da calibração; gravar a apresentação com os quatro integrantes e publicar no YouTube como público ou não listado. A demonstração com vídeo externo já é reproduzível, mas ainda não há coleta de campo do grupo.
+## Organização e entrega
 
-O [roteiro de apresentação](docs/ROTEIRO_VIDEO.md) tem duração planejada de 8 minutos e 40 segundos. Os requisitos do professor e o estado de cada entrega estão em [docs/ENTREGA.md](docs/ENTREGA.md).
+- `detector.py`: os dois métodos, confirmação temporal, anotação e exportação.
+- `aplicativo.py`, `app/` e `INICIAR_APLICATIVO.bat`: janela nativa e iniciador.
+- `executar_exemplo.py`: processamento e avaliação dos exemplos reais.
+- `calibrar.py`, `extrair_referencia.py`, `demo.py`, `avaliar.py`: preparação e avaliação.
+- `dados/terceiros/`: vídeo, mapas, rótulos e registro de origem.
+- `tests/` e `.github/workflows/`: testes locais e automáticos.
+- [ROTEIRO_VIDEO.md](docs/ROTEIRO_VIDEO.md): apresentação planejada em 8 minutos e 40 segundos.
+- [ENTREGA.md](docs/ENTREGA.md): exigências e conferência dos links finais.
 
-## Referência técnica
-
-OpenCV, documentação oficial: [operações em matrizes e diferença absoluta](https://docs.opencv.org/4.13.0/d2/de8/group__core__array.html). Acesso em 13/11/2026.
+A coleta própria, a avaliação independente e o vídeo do YouTube com os quatro integrantes continuam pendentes. As tarefas são acompanhadas nas [issues](https://github.com/VitorRodi/detector-vagas-estacionamento/issues).

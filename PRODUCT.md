@@ -18,11 +18,11 @@ Reproduzir uma gravação e mostrar o resultado do detector para cada vaga monit
 
 ## Evidências existentes
 
-O projeto inclui um vídeo externo de estacionamento com 679 quadros a 24 FPS, cinco regiões cadastradas e uma referência vazia dessas regiões no quadro 678. A execução exporta ocupação, eventos e avaliação exploratória. A amostra tem 60 rótulos: 54 concordantes, cinco indefinidos e um falso positivo. Os resultados são do mesmo clipe usado no cadastro e não constituem validação independente.
+O projeto inclui um vídeo externo de estacionamento com 679 quadros a 24 FPS, 68 regiões cadastradas, com classificação por textura e confirmação temporal. A execução exporta ocupação, eventos e avaliação exploratória. A amostra tem 191 rótulos: 183 concordantes, cinco indefinidos e três divergentes. Os resultados são do mesmo clipe usado no cadastro e não constituem validação independente.
 
 ## Restrições
 
-- Exibir somente as cinco vagas efetivamente monitoradas; não inferir o estado das demais vagas visíveis.
+- Exibir as 68 vagas cadastradas, excluindo ilhas, corredores e o obstáculo central.
 - Identificar a gravação como demonstração, sem simular uma câmera ao vivo.
 - Associar cor e texto aos estados para que o resultado não dependa somente de cor.
 - Não inventar sensores, câmeras, redes neurais, dados de campo ou precisão de generalização.

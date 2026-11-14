@@ -1,6 +1,6 @@
 # Aplicativo Vaga
 
-A interface nativa usa o detector e os arquivos de análise deste repositório. Ela reproduz uma gravação e sincroniza cada imagem com os estados calculados para cinco regiões. A janela apresenta a gravação incluída; as demais vagas visíveis não são monitoradas.
+A interface nativa usa o detector e os arquivos de análise deste repositório. Ela reproduz uma gravação e sincroniza cada imagem com os estados calculados para 68 vagas. A janela apresenta a gravação incluída; ilhas, corredores e o obstáculo central não são vagas monitoradas.
 
 ## Instalação e abertura
 
@@ -34,7 +34,7 @@ Para reutilizar resultados completos de uma execução anterior:
 | Velocidade | Reprodução em 0,5×, 1×, 1,5× ou 2× |
 | Marcações | Mostra ou oculta polígonos e etiquetas no vídeo |
 | Filtro de vagas | Restringe a lista por estado, sem alterar o total dos contadores |
-| Vaga na lista ou região no vídeo | Destaca a mesma vaga e mostra sua fração de área alterada |
+| Vaga na lista ou região no vídeo | Destaca a mesma vaga e mostra sua densidade de textura |
 | Últimas alterações | Clique em uma mudança para voltar ao quadro em que foi confirmada |
 | Reprocessar | Executa novamente o detector e substitui a análise anterior |
 | Apresentar / F11 | Entra ou sai da tela cheia, ocultando a barra lateral e o rodapé |
@@ -45,7 +45,7 @@ Para reutilizar resultados completos de uma execução anterior:
 
 A navegação usa uma lateral azul-escura e os contadores destacam os totais do quadro atual. A lista mostra etiquetas de estado com texto e fundo colorido. Os controles reservam o mesmo contorno em repouso, seleção e foco, evitando deslocamentos durante a navegação.
 
-Verde significa **Livre**, vermelho significa **Ocupada** e amarelo significa **Em análise**. Os estados também aparecem por escrito. A área alterada é uma fração de pixels comparada à referência, não uma probabilidade de haver um carro.
+Verde significa **Livre**, vermelho significa **Ocupada** e amarelo significa **Em análise**. Os estados também aparecem por escrito. A textura detectada é a proporção de pixels marcados pelo processamento dentro da vaga, não uma probabilidade de haver um carro. As 68 regiões têm retângulos compactos e a lista tem rolagem.
 
 O histórico inclui somente mudanças confirmadas até o instante mostrado; as confirmações iniciais não são exibidas como entradas ou saídas. Buscar um instante anterior também recua o histórico. Ao terminar a gravação, Reproduzir começa novamente no início.
 
@@ -57,14 +57,14 @@ Os resultados originais ficam em `resultados/carpark/`. O botão Reprocessar inv
 
 ## Ensaio para a apresentação
 
-1. Abra o aplicativo e aguarde a análise. Mostre dois estados livres e três ocupados no instante inicial exibido.
-2. Reproduza a gravação. V01, V02 e V03 são confirmadas como livres nos quadros 147, 222 e 361, respectivamente.
+1. Abra o aplicativo e aguarde a análise. Mostre 11 estados livres e 57 ocupados no instante inicial exibido.
+2. Reproduza a gravação. V01, V02 e V03 são confirmadas pelo algoritmo como livres nos quadros 118, 172 e 370, respectivamente.
 3. Pause, selecione uma vaga e compare o destaque no vídeo com o texto da lista.
 4. Aplique o filtro Somente livres e volte a uma alteração pelo histórico.
 5. Use Apresentar para mostrar a gravação em tela cheia; volte com Esc e clique em Pausar.
 6. Exporte o ZIP e explique uma linha do CSV. Abra Sobre o projeto para discutir resultados e limitações.
 
-O clipe contém saídas das três vagas inicialmente ocupadas e duas vagas de controle livres. Ele não demonstra entradas nessas cinco regiões. Para mostrar uma entrada, use o cenário simulado ou uma coleta própria que contenha essa situação e identifique a origem do material.
+O clipe contém saídas de V01, V02 e V03. O classificador também registra falsas mudanças em V55 durante passagem de pessoas/sombras; apresente essa limitação. Não há entradas de veículos estacionando no clipe. Para mostrar uma entrada, use o cenário simulado ou uma coleta própria que contenha essa situação e identifique a origem do material.
 
 ## Solução de problemas
 
