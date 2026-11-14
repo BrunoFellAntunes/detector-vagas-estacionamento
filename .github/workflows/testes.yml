@@ -37,5 +37,5 @@ jobs:
         run: python verificar_demo.py
       - name: Executar e avaliar cinco vagas no vídeo real
         run: python executar_exemplo.py --output resultados/referencia
-      - name: Executar e avaliar as 68 vagas do mapa completo
+      - name: Executar e avaliar as 71 regiões do mapa completo
         run: python executar_exemplo.py --completo

@@ -1,6 +1,6 @@
 # Experimento com vídeo real de terceiros
 
-Este relatório descreve o experimento anterior de cinco regiões por referência vazia. O aplicativo atual monitora 68 vagas pelo método descrito em [MAPA_COMPLETO.md](MAPA_COMPLETO.md).
+Este relatório descreve o experimento anterior de cinco regiões por referência vazia. O aplicativo atual monitora 71 regiões pelo método descrito em [MAPA_COMPLETO.md](MAPA_COMPLETO.md).
 
 O exemplo acompanha cinco regiões internas de vagas no arquivo `dados/terceiros/carPark.mp4`. O vídeo é externo e sua origem está documentada em [FONTES_MIDIA.md](FONTES_MIDIA.md). A execução ilustra o funcionamento do algoritmo no clipe; não é um levantamento do estacionamento do grupo nem uma avaliação independente de generalização.
 

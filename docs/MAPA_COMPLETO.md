@@ -1,10 +1,10 @@
-# Experimento com 68 vagas
+# Mapa com 71 regiões e ocupação ambígua
 
 ## Cadastro e exclusões
 
-O mapa `dados/terceiros/vagas_completas_carpark.json` contém 68 retângulos conferidos visualmente sobre a filmagem original, em 1100 × 720. Há seis colunas (setores A a F) e até 12 linhas. Os setores A, B e E possuem 12 vagas cada; C e D possuem 11 cada, excluindo a linha 9 ocupada pelo obstáculo central; F possui dez, começando na linha 3 porque as duas primeiras posições são ilha/calçada. Corredores e veículos em circulação não são vagas adicionais.
+O mapa `dados/terceiros/vagas_completas_carpark.json` contém 71 retângulos em 1100 × 720: 69 vagas cadastradas e duas áreas centrais que exigem análise conjunta. Há seis setores de até 12 linhas. A ilha na primeira posição de F e os corredores ficam fora do mapa. V69 ocupa a segunda posição de F, imediatamente acima da V59, que faltava na versão anterior.
 
-V01–V05 mantêm as posições do experimento anterior, agora com retângulos que abrangem as vagas. V06–V68 completam o mapa. Os rótulos normais na janela mostram apenas o identificador; selecionar uma região mostra também seu estado. A lista possui rolagem para acessar todas as vagas.
+V01–V68 preservam os identificadores anteriores. V70 e V71 abrangem a van nas duas áreas centrais hachuradas (C9 e D9). Essas regiões são exibidas para revisão e não são acrescentadas à disponibilidade enquanto houver ambiguidade. As etiquetas normais são compactas; a seleção mostra estado e motivo. A lista tem rolagem.
 
 ## Método e calibração
 
@@ -12,32 +12,40 @@ O vídeo não fornece fundo vazio para todas as vagas: a maioria dos veículos p
 
 Bloco adaptativo 25 e constante 16; limiares gerais livre ≤ 0,11 e ocupada ≥ 0,12. V06 e V18 usam livre ≤ 0,05 e ocupada ≥ 0,065, ajustados às superfícies lisas das vans. Não há estado ocupado fixado por configuração: a medida continua sendo calculada em cada quadro. Cinco quadros consecutivos confirmam uma candidatura; a faixa entre limiares conserva o estado anterior.
 
-O arquivo `referencia_carpark.png` é usado somente para fornecer formato e resolução nesse modo. Seus pixels não entram na comparação por textura e ele não é tratado como imagem vazia das 68 vagas. O modo anterior de diferença contra referência permanece disponível, com suas cinco regiões e rótulos separados.
+O arquivo `referencia_carpark.png` é usado somente para fornecer formato e resolução nesse modo. Seus pixels não entram na comparação por textura e ele não é tratado como imagem vazia do mapa completo. O modo anterior de diferença contra referência permanece disponível, com suas cinco regiões e rótulos separados.
+
+## Ocupação de duas regiões
+
+O grupo cadastrado `ambiguous_groups` une V70 e V71. No retângulo conjunto, o algoritmo encontra componentes claros conexos (cinza suavizado ≥ 180). Quando um mesmo componente cobre pelo menos 8% da máscara interna de cada região, ambas passam imediatamente a `indefinida`, exibida em amarelo como Em análise. A textura individual ainda é registrada, mas não produz uma indicação confiante de livre ou ocupada nesse par. O motivo vai para o CSV e para o detalhe da janela.
+
+Se a conexão deixa de existir, o motivo é removido e os estados voltam a exigir cinco quadros consecutivos antes de serem confirmados. Não há estado amarelo fixado por ID ou por intervalo de tempo. O mecanismo é uma heurística restrita aos pares cadastrados, não reconhecimento semântico de vans, detecção de infração ou solução geral para todos os tipos de veículos. Objetos claros e marcas do piso podem provocar ambiguidade indevida.
+
+No clipe incluído, V70 e V71 permaneceram em análise nos 679 quadros, com o motivo registrado em todas as 1.358 decisões do par. V69 está livre nos dois quadros da amostra.
 
 ## Rotulagem e resultados
 
-`rotulos_completos_carpark.csv` contém 191 chaves únicas. Foram conferidas visualmente todas as 68 vagas nos quadros 60 e 678 e mantidos os 60 rótulos anteriores; cinco pares do quadro 60 se repetiriam e entram apenas uma vez. As vagas vazias no quadro 60 são V04, V05, V29, V41, V44, V45, V53, V55, V57, V65 e V66. No quadro 678, V01, V02 e V03 também estão vazias; as demais regiões têm veículos visíveis.
+`rotulos_completos_carpark.csv` contém 197 chaves únicas. Foram conferidas visualmente as 71 regiões nos quadros 60 e 678 e mantidos os 60 rótulos anteriores; cinco pares do quadro 60 se repetiriam e entram apenas uma vez. As vagas vazias no quadro 60 são V04, V05, V29, V41, V44, V45, V53, V55, V57, V65, V66 e V69. No quadro 678, V01, V02 e V03 também estão vazias; as demais regiões têm veículos visíveis. V70 e V71 foram rotuladas como ocupadas pela presença visível da van, mas o algoritmo se abstém de decidir a ocupação individual: suas quatro amostras entram como indefinidas no cálculo de cobertura, sem serem ocultadas.
 
 | Medida | Resultado |
 |---|---:|
 | Quadros | 679 |
-| Vagas | 68 |
-| Decisões | 46.172 |
-| Eventos incluindo inicialização | 75 |
-| Rótulos visuais | 191 |
-| Concordantes | 183 |
-| Indefinidos | 5 |
+| Regiões cadastradas | 71 |
+| Decisões | 48.209 |
+| Eventos incluindo inicialização | 76 |
+| Rótulos visuais | 197 |
+| Concordantes | 185 |
+| Indefinidos | 9 |
 | Divergentes definidos | 3 |
-| Concordância total | 95,81% |
-| Cobertura | 97,38% |
-| Acurácia somente definida | 98,39% |
-| TP / TN / FP / FN | 116 / 67 / 1 / 2 |
-| Quadro 60: livres / ocupadas | 11 / 57 |
-| Quadro 678: livres / ocupadas | 14 / 54 |
+| Concordância total | 93,91% |
+| Cobertura | 95,43% |
+| Acurácia somente definida | 98,40% |
+| TP / TN / FP / FN | 116 / 69 / 1 / 2 |
+| Quadro 60: livres / ocupadas / análise | 12 / 57 / 2 |
+| Quadro 678: livres / ocupadas / análise | 15 / 54 / 2 |
 
-Os cinco indefinidos pertencem à amostra do quadro zero, antes da inicialização temporal. As três divergências são V01 no quadro 120 e V02 no quadro 180 (liberação antecipada pelo algoritmo enquanto a anotação ainda considera a vaga ocupada), e V03 no quadro 360 (ainda ocupada durante a confirmação de saída). O algoritmo confirma livre em V01/118, V02/172 e V03/370. Esses são instantes do classificador, não medidas da saída física completa.
+Cinco dos nove indefinidos pertencem à amostra do quadro zero, antes da inicialização temporal. Os outros quatro são as abstenções intencionais do par central nos quadros 60 e 678. As três divergências são V01 no quadro 120 e V02 no quadro 180 (liberação antecipada pelo algoritmo enquanto a anotação ainda considera a vaga ocupada), e V03 no quadro 360 (ainda ocupada durante a confirmação de saída). O algoritmo confirma livre em V01/118, V02/172 e V03/370. Esses são instantes do classificador, não medidas da saída física completa.
 
-O histórico completo também contém falsas mudanças de V55 durante passagem de pessoas/sombras: livre → ocupada → livre nos intervalos 126–140 e 443–512. A amostra pontual de 191 rótulos não captura todos os erros ao longo do vídeo; não apresentar sua concordância como precisão integral de cada decisão.
+O histórico completo também contém falsas mudanças de V55 durante passagem de pessoas/sombras: livre → ocupada → livre nos intervalos 126–140 e 443–512. A amostra pontual de 197 rótulos não captura todos os erros ao longo do vídeo; não apresentar sua concordância como precisão integral de cada decisão.
 
 Os instantes acima são da execução Windows registrada. Na execução Linux dos testes, V01 foi confirmada no quadro 117 em vez de 118. As duas plataformas podem produzir pequenas diferenças na análise da imagem; o histórico sempre busca o índice efetivamente gravado em `eventos.csv`.
 

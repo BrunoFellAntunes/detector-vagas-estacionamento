@@ -24,7 +24,7 @@ Apresentação exclusivamente com slides e vídeo privado não atendem às regra
 
 ## Estado do projeto
 
-O detector, o cadastro manual, as entradas simuladas, a interface nativa e os testes estão disponíveis. O aplicativo abre com `INICIAR_APLICATIVO.bat` e oferece contagem, filtros, reprodução, histórico, tela cheia e exportação; o guia está em [APLICATIVO.md](APLICATIVO.md). O exemplo real em `executar_exemplo.py` oferece o mapa completo de 68 vagas por textura e mantém o experimento anterior de cinco regiões por referência. A amostra completa tem 191 rótulos visuais; veja [MAPA_COMPLETO.md](MAPA_COMPLETO.md). A interação de cadastro por mouse e a captura em câmera física ainda dependem do ensaio no equipamento do grupo. A coleta própria, a avaliação em sequências independentes e a apresentação final continuam pendentes.
+O detector, o cadastro manual, as entradas simuladas, a interface nativa e os testes estão disponíveis. O aplicativo abre com `INICIAR_APLICATIVO.bat` e oferece contagem, filtros, reprodução, histórico, tela cheia e exportação; o guia está em [APLICATIVO.md](APLICATIVO.md). O exemplo real em `executar_exemplo.py` oferece o mapa completo de 71 regiões por textura e mantém o experimento anterior de cinco regiões por referência. A amostra completa tem 197 rótulos visuais; veja [MAPA_COMPLETO.md](MAPA_COMPLETO.md). A interação de cadastro por mouse e a captura em câmera física ainda dependem do ensaio no equipamento do grupo. A coleta própria, a avaliação em sequências independentes e a apresentação final continuam pendentes.
 
 As tarefas são acompanhadas nas [issues](https://github.com/VitorRodi/detector-vagas-estacionamento/issues), com critérios de conclusão e registros das verificações.
 

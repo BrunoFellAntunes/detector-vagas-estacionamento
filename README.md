@@ -6,9 +6,9 @@ Projeto acadêmico de Robótica e Visão Computacional da Unochapecó, docente W
 
 ## Problema e situação atual
 
-A proposta é facilitar a consulta à disponibilidade de vagas a partir de uma câmera fixa. O aplicativo apresenta uma gravação de terceiros com **68 vagas visíveis cadastradas**, cada uma com um retângulo, identificador e estado. Ilhas, corredores, o obstáculo central e regiões fora do enquadramento ficam fora da contagem.
+A proposta é facilitar a consulta à disponibilidade de vagas a partir de uma câmera fixa. O aplicativo apresenta uma gravação de terceiros com **71 regiões cadastradas: 69 vagas e duas áreas centrais de ocupação ambígua**, cada uma com um retângulo, identificador e estado. Ilhas, corredores e regiões fora do enquadramento ficam fora da contagem. A van central é acompanhada por duas regiões que ficam em análise quando um objeto claro atravessa ambas.
 
-![Aplicativo com as 68 vagas marcadas](assets/aplicativo.png)
+![Aplicativo com as 71 regiões marcadas](assets/aplicativo.png)
 
 A demonstração está implementada, mas a investigação de campo, as gravações próprias e a avaliação em vídeos independentes ainda precisam ser realizadas. Não foi medida redução de tempo de procura. O vídeo final do grupo ainda precisa ser gravado e publicado no YouTube, com participação verbal dos quatro integrantes e duração de até dez minutos.
 
@@ -32,7 +32,7 @@ Para abrir uma análise completa já salva, use:
 
 A janela oferece contadores sincronizados, filtros, seleção de vagas pelo vídeo ou pela lista com rolagem, histórico, busca, velocidade, tela cheia e exportação ZIP. As marcações usam verde para livre, vermelho para ocupada e amarelo para em análise. No mapa completo, as etiquetas ficam compactas; a vaga selecionada mostra seu estado por extenso.
 
-**Apresentar** ou F11 abre a tela cheia. Esc sai da tela cheia; na janela normal, pausa a reprodução. O filtro altera somente a lista: os contadores continuam incluindo as 68 vagas. Veja [o guia do aplicativo](docs/APLICATIVO.md).
+**Apresentar** ou F11 abre a tela cheia. Esc sai da tela cheia; na janela normal, pausa a reprodução. O filtro altera somente a lista: os contadores continuam incluindo as 71 regiões. Veja [o guia do aplicativo](docs/APLICATIVO.md).
 
 ## Tecnologias e funcionamento
 
@@ -40,7 +40,7 @@ Python, NumPy e OpenCV fazem o processamento; PySide6/Qt implementa a janela nat
 
 | Modo | Regiões | Medida | Execução |
 |---|---:|---|---|
-| Mapa completo, padrão do aplicativo | 68 | Densidade de textura dentro de cada vaga | `executar_exemplo.py --completo` |
+| Mapa completo, padrão do aplicativo | 71 regiões | Densidade de textura dentro de cada vaga | `executar_exemplo.py --completo` |
 | Experimento anterior por referência | 5 | Fração de pixels diferentes de uma referência vazia | `executar_exemplo.py` |
 
 No mapa completo, o vídeo não contém um quadro em que todas as vagas estejam vazias. Comparar todas as regiões com o último quadro faria carros parados parecerem vagas livres. Por isso, o modo completo usa tons de cinza, suavização, limiarização adaptativa, mediana e dilatação para medir textura. Dois limiares e cinco quadros consecutivos confirmam o estado. Essa heurística depende do enquadramento e pode confundir pedestres, sombras, marcas do piso e veículos com pouca textura.
@@ -70,19 +70,21 @@ Em Linux, crie o ambiente com `python3 -m venv .venv` e use `.venv/bin/python`. 
 
 O arquivo [carPark.mp4](dados/terceiros/carPark.mp4) contém 679 quadros, 24 FPS, resolução de 1100 × 720 e duração aproximada de 28,29 segundos. Foi obtido do repositório de [Harsh Bafna](https://github.com/harshbafnaa/car-parking-detection). A fonte, a declaração de licença disponível, a revisão e os limites de atribuição estão em [FONTES_MIDIA.md](docs/FONTES_MIDIA.md).
 
-O mapa está em [vagas_completas_carpark.json](dados/terceiros/vagas_completas_carpark.json). São seis colunas de vagas; os identificadores V01–V05 preservam as posições do experimento anterior. Os demais vão até V68. Cada região registra setor, linha e coordenadas. Consulte [MAPA_COMPLETO.md](docs/MAPA_COMPLETO.md) para o procedimento e as limitações.
+O mapa está em [vagas_completas_carpark.json](dados/terceiros/vagas_completas_carpark.json). São seis colunas de regiões; os identificadores V01–V05 preservam as posições do experimento anterior. V06–V68 completam o mapa inicial. V69 é a vaga acima da V59; V70 e V71 acompanham a van central. Cada região registra setor, linha e coordenadas. Consulte [MAPA_COMPLETO.md](docs/MAPA_COMPLETO.md) para o procedimento e as limitações.
 
-A execução completa gera **46.172 decisões**. No quadro 60, há 11 estados livres e 57 ocupados; no último quadro, 14 livres e 54 ocupados. Esses números são saídas do detector, não prova de funcionamento em campo.
+A execução completa gera **48.209 decisões**. No quadro 60, há 12 estados livres, 57 ocupados e dois em análise; no último quadro, 15 livres, 54 ocupados e dois em análise. Esses números são saídas do detector, não prova de funcionamento em campo.
 
-A amostra rotulada tem 191 pares de quadro e vaga, cobrindo todas as 68 vagas em dois quadros e a amostra anterior. Foram 183 concordantes, cinco indefinidos e três divergentes: **95,81% de concordância total e 97,38% de cobertura**. Regiões e limiares foram calibrados neste mesmo vídeo. A matriz e os erros estão documentados em [MAPA_COMPLETO.md](docs/MAPA_COMPLETO.md). O relatório anterior de cinco vagas está preservado em [EXPERIMENTO_REAL.md](docs/EXPERIMENTO_REAL.md).
+A amostra rotulada tem 197 pares de quadro e região, cobrindo as 71 regiões em dois quadros e a amostra anterior. Foram 185 concordantes, nove indefinidos e três divergentes: **93,91% de concordância total e 95,43% de cobertura**. Regiões e limiares foram calibrados neste mesmo vídeo. A matriz e os erros estão documentados em [MAPA_COMPLETO.md](docs/MAPA_COMPLETO.md). O relatório anterior de cinco vagas está preservado em [EXPERIMENTO_REAL.md](docs/EXPERIMENTO_REAL.md).
 
 ## Exportações e parâmetros
 
 As saídas padrão ficam em `resultados/carpark/`: `ocupacao.csv`, `eventos.csv`, `resumo.json`, `avaliacao.json`, `ultimo_quadro.png` e `video_anotado.mp4`. O aplicativo exporta esses resultados em ZIP. Eles representam a análise completa, independentemente do filtro ou instante exibido.
 
-CSV de ocupação: `quadro`, `tempo_video_s`, `vaga`, `estado` e `densidade_textura` no modo completo. No modo por referência, a última coluna é `fracao_alterada`. O resumo registra o método e o total de vagas. Eventos incluem confirmações iniciais e mudanças posteriores; o histórico da janela omite a inicialização.
+CSV de ocupação: `quadro`, `tempo_video_s`, `vaga`, `estado`, `densidade_textura` e `motivo` no modo completo. O motivo explica a abstenção das duas regiões centrais. No modo por referência, a medida é `fracao_alterada`, seguida de `motivo`. O resumo registra o método e o total de vagas. Eventos incluem confirmações iniciais e mudanças posteriores; o histórico da janela omite a inicialização.
 
-No modo completo, a configuração usa bloco adaptativo 25, constante 16, mediana 5 × 5, dilatação 3 × 3 e margem interna de três pixels. Os limiares gerais são livre até 0,11 e ocupada a partir de 0,12. V06 e V18 têm limiares locais 0,05/0,065 por conterem vans com superfícies lisas; continuam podendo mudar de estado conforme a imagem. Entre os limiares, mantém-se o estado anterior; sem confirmação, permanece em análise. Em imagem estática, o estado é calculado imediatamente.
+No modo completo, a configuração usa bloco adaptativo 25, constante 16, mediana 5 × 5, dilatação 3 × 3 e margem interna de três pixels. Os pares de revisão usam componentes claros conexos com brilho mínimo 180 e presença em pelo menos 8% de cada região do par. Essa regra não reconhece semanticamente veículos nem detecta automaticamente toda ocupação atravessada: o par central foi cadastrado manualmente.
+
+Os limiares gerais são livre até 0,11 e ocupada a partir de 0,12. V06 e V18 têm limiares locais 0,05/0,065 por conterem vans com superfícies lisas; continuam podendo mudar de estado conforme a imagem. Entre os limiares, mantém-se o estado anterior; sem confirmação, permanece em análise. Em imagem estática, o estado é calculado imediatamente.
 
 Os resultados antigos são invalidados ao iniciar uma nova execução. Vídeo interrompido não deve ser avaliado como completo. O tempo do resumo inclui processamento, exportação e eventual exibição/pausa; não é um benchmark isolado do algoritmo.
 
@@ -95,7 +97,7 @@ Os resultados antigos são invalidados ao iniciar uma nova execução. Vídeo in
 .\.venv\Scripts\python.exe verificar_demo.py
 ```
 
-A suíte completa tem 43 testes. Instale `requirements-app.txt` para incluir os testes reais de widgets Qt; com somente `requirements.txt`, os testes de Qt são omitidos. A suíte cobre textura, referência, confirmação temporal, avaliação, exportação, reprodução, erros, cancelamento e seleção da última vaga pela rolagem. GitHub Actions executa em Windows e Linux e repete os vídeos simulado, completo e anterior.
+A suíte completa tem 47 testes. Instale `requirements-app.txt` para incluir os testes reais de widgets Qt; com somente `requirements.txt`, os testes de Qt são omitidos. A suíte cobre textura, referência, confirmação temporal, avaliação, exportação, reprodução, erros, cancelamento e seleção da última região pela rolagem e ambiguidade entre duas regiões. GitHub Actions executa em Windows e Linux e repete os vídeos simulado, completo e anterior.
 
 A simulação tem 240 quadros e seis vagas: 1.408 de 1.440 decisões concordantes, 24 indefinidas na inicialização e oito divergentes durante a confirmação temporal. A concordância de 97,78% descreve somente essa simulação.
 

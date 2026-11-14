@@ -1,6 +1,6 @@
 # Aplicativo Vaga
 
-A interface nativa usa o detector e os arquivos de análise deste repositório. Ela reproduz uma gravação e sincroniza cada imagem com os estados calculados para 68 vagas. A janela apresenta a gravação incluída; ilhas, corredores e o obstáculo central não são vagas monitoradas.
+A interface nativa usa o detector e os arquivos de análise deste repositório. Ela reproduz uma gravação e sincroniza cada imagem com os estados calculados para 71 regiões. A janela apresenta a gravação incluída; ilhas e corredores ficam fora do mapa; as duas áreas da van central são monitoradas para análise conjunta.
 
 ## Instalação e abertura
 
@@ -45,9 +45,11 @@ Para reutilizar resultados completos de uma execução anterior:
 
 A navegação usa uma lateral azul-escura e os contadores destacam os totais do quadro atual. A lista mostra etiquetas de estado com texto e fundo colorido. Os controles reservam o mesmo contorno em repouso, seleção e foco, evitando deslocamentos durante a navegação.
 
-Verde significa **Livre**, vermelho significa **Ocupada** e amarelo significa **Em análise**. Os estados também aparecem por escrito. A textura detectada é a proporção de pixels marcados pelo processamento dentro da vaga, não uma probabilidade de haver um carro. As 68 regiões têm retângulos compactos e a lista tem rolagem.
+Verde significa **Livre**, vermelho significa **Ocupada** e amarelo significa **Em análise**. Os estados também aparecem por escrito. A textura detectada é a proporção de pixels marcados pelo processamento dentro da vaga, não uma probabilidade de haver um carro. As 71 regiões têm retângulos compactos e a lista tem rolagem.
 
 O histórico inclui somente mudanças confirmadas até o instante mostrado; as confirmações iniciais não são exibidas como entradas ou saídas. Buscar um instante anterior também recua o histórico. Ao terminar a gravação, Reproduzir começa novamente no início.
+
+Ao selecionar V70 ou V71, o detalhe mostra o motivo da análise conjunta. O amarelo não significa vaga disponível: indica que o programa não confirma a ocupação individual porque um mesmo objeto claro atravessa as duas regiões. A V69, acima da V59, participa normalmente da classificação.
 
 ## Exportações
 
@@ -57,7 +59,7 @@ Os resultados originais ficam em `resultados/carpark/`. O botão Reprocessar inv
 
 ## Ensaio para a apresentação
 
-1. Abra o aplicativo e aguarde a análise. Mostre 11 estados livres e 57 ocupados no instante inicial exibido.
+1. Abra o aplicativo e aguarde a análise. Mostre 12 estados livres, 57 ocupados e dois em análise no instante inicial exibido.
 2. Reproduza a gravação. V01, V02 e V03 são confirmadas pelo algoritmo como livres nos quadros 118, 172 e 370, respectivamente.
 3. Pause, selecione uma vaga e compare o destaque no vídeo com o texto da lista.
 4. Aplique o filtro Somente livres e volte a uma alteração pelo histórico.

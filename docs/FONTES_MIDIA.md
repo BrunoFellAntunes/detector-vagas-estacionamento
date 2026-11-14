@@ -34,4 +34,4 @@ As fontes locais [Sora](https://github.com/google/fonts/tree/main/ofl/sora) e [M
 Os ícones SVG e o símbolo P da janela são desenhados no código do aplicativo.
 
 
-O mapa completo em `vagas_completas_carpark.json` e os 191 rótulos em `rotulos_completos_carpark.csv` foram cadastrados para esta mesma filmagem. Não são anotações fornecidas pelo autor do vídeo nem dados de campo independentes. A captura atual de `assets/aplicativo.png` mostra as 68 vagas no quadro 60.
+O mapa completo em `vagas_completas_carpark.json` e os 197 rótulos em `rotulos_completos_carpark.csv` foram cadastrados para esta mesma filmagem. Não são anotações fornecidas pelo autor do vídeo nem dados de campo independentes. A captura atual de `assets/aplicativo.png` mostra as 71 regiões no quadro 60.

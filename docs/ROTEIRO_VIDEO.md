@@ -29,15 +29,15 @@ Mostrar uma foto autorizada do contexto e o objetivo do projeto. Transição: �
 
 Mostrar brevemente `detector.py` e o diagrama verbal: câmera fixa → tons de cinza e suavização → limiarização adaptativa → mediana e dilatação → densidade de textura por vaga → confirmação temporal → contagem e registro.
 
-Fala central: “Usamos Python, OpenCV e NumPy, com PySide6 para a janela nativa. Não treinamos uma rede neural. Cadastramos manualmente 68 vagas e medimos textura em cada região. O valor não é uma probabilidade de haver um carro. O modo anterior por referência vazia também permanece disponível.”
+Fala central: “Usamos Python, OpenCV e NumPy, com PySide6 para a janela nativa. Não treinamos uma rede neural. Cadastramos manualmente 71 regiões e medimos textura em cada região. O valor não é uma probabilidade de haver um carro. O modo anterior por referência vazia também permanece disponível.”
 
 Explicar os dois limiares e os cinco quadros de confirmação. Explicar por que não se usa o último quadro como fundo vazio global: muitos carros continuam estacionados. A textura permite analisar esses carros parados, com limitações. Explicar que alterações de sombra também podem causar erro. Transição: “Agora vamos executar o programa e acompanhar o que acontece em cada vaga.”
 
 ## Bruno Fell Antunes inicia a demonstração
 
-Mostrar vagas_completas_carpark.json e como os quatro cantos delimitam cada vaga. Identificar os seis setores e as exclusões de ilhas, corredores e obstáculo central. Usar uma cópia da configuração caso se demonstre a ferramenta de cadastro manual.
+Mostrar vagas_completas_carpark.json e como os quatro cantos delimitam cada vaga. Identificar os seis setores e as exclusões de ilhas e corredores. Mostrar V69 acima da V59 e a revisão conjunta de V70/V71 sob a van. Usar uma cópia da configuração caso se demonstre a ferramenta de cadastro manual.
 
-Abrir `INICIAR_APLICATIVO.bat`, aguardar a análise e mostrar a janela Vaga com 11 estados livres e 57 ocupados. Mostrar Reprocessar, que executa novamente o detector, e o botão Reproduzir. Explicar o significado de verde, vermelho e amarelo. Demonstrar que a contagem acompanha os estados e que uma alteração fora de uma região não deveria mudar aquela vaga.
+Abrir `INICIAR_APLICATIVO.bat`, aguardar a análise e mostrar a janela Vaga com 12 estados livres, 57 ocupados e dois em análise. Mostrar Reprocessar, que executa novamente o detector, e o botão Reproduzir. Explicar o significado de verde, vermelho e amarelo. Demonstrar que a contagem acompanha os estados e que uma alteração fora de uma região não deveria mudar aquela vaga.
 
 Para ensaiar com dados simulados:
 
@@ -46,7 +46,7 @@ Para ensaiar com dados simulados:
 .\.venv\Scripts\python.exe detector.py --source dados/cena_simulada.png --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/imagem --show
 ```
 
-O exemplo real já cadastrado abre em uma janela nativa com `.\.venv\Scripts\python.exe aplicativo.py`. O comando `executar_exemplo.py --completo --show` continua disponível para demonstrar o detector diretamente. Ele monitora 68 vagas do vídeo de terceiros; explicar a origem, o mapa e os limiares conforme `MAPA_COMPLETO.md`. A imagem do quadro 678 não é um fundo vazio das 68 vagas. Na interface Vaga, usar Reproduzir/Pausar e a barra de posição para explicar as saídas. O botão Apresentar abre tela cheia; Esc retorna à janela. Veja [APLICATIVO.md](APLICATIVO.md) para o percurso de ensaio. Para uma gravação própria, seguir `COLETA_REAL.md`. Mostrar o comando completo e pelo menos um trecho do processamento. A demonstração deve usar o mesmo código publicado no GitHub.
+O exemplo real já cadastrado abre em uma janela nativa com `.\.venv\Scripts\python.exe aplicativo.py`. O comando `executar_exemplo.py --completo --show` continua disponível para demonstrar o detector diretamente. Ele monitora 71 regiões do vídeo de terceiros; explicar a origem, o mapa e os limiares conforme `MAPA_COMPLETO.md`. A imagem do quadro 678 não é um fundo vazio das 71 regiões. Na interface Vaga, usar Reproduzir/Pausar e a barra de posição para explicar as saídas. O botão Apresentar abre tela cheia; Esc retorna à janela. Veja [APLICATIVO.md](APLICATIVO.md) para o percurso de ensaio. Para uma gravação própria, seguir `COLETA_REAL.md`. Mostrar o comando completo e pelo menos um trecho do processamento. A demonstração deve usar o mesmo código publicado no GitHub.
 
 ## Edson Leandro Soares continua a demonstração
 

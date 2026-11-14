@@ -225,7 +225,7 @@ A navegação ocupa 196px à esquerda. O conteúdo tem margens de 24px nas later
 
 Os painéis do vídeo usam margem interna de 12px; a lista usa 15px; a faixa de métricas usa 22px nas laterais e 14px na vertical. As linhas das vagas ficam separadas por 7px. Controles de reprodução usam intervalos de 8px. Essas medidas vêm dos layouts nativos e coexistem com o preenchimento QSS dos controles.
 
-A página Sobre mantém a coluna de leitura com largura máxima de 800px dentro de um painel branco. O histórico reserva 166px e usa rolagem quando há mais eventos. A lista de 68 vagas também usa rolagem vertical, com detalhe e exportação fixos abaixo.
+A página Sobre mantém a coluna de leitura com largura máxima de 800px dentro de um painel branco. O histórico reserva 166px e usa rolagem quando há mais eventos. A lista de 71 regiões também usa rolagem vertical, com detalhe e exportação fixos abaixo.
 
 O vídeo mantém a proporção da gravação, com margens azul-escuras quando necessário, sem recorte. A área de desenho tem mínimo de 360 × 220. No modo apresentação, a janela ocupa a tela inteira e oculta navegação e rodapé, preservando vídeo, contagens e controles.
 
@@ -265,11 +265,11 @@ Os três contadores compartilham um painel branco, com divisórias e números de
 
 ### Vagas monitoradas
 
-Cada linha é um botão com identificador à esquerda e etiqueta de estado à direita. As etiquetas combinam texto escuro e fundo suave verde, vermelho ou âmbar, com preenchimento de 3px por 7px e canto `badge`. A cor dos contadores permanece independente da variante da etiqueta. A seleção usa `space-selected-border` e `space-selected`; quando também focada, recebe `primary-focus` e `space-focus`. Selecionar a linha destaca a mesma região no vídeo e mostra o índice de textura detectada em uma área de detalhe com fundo azul-claro abaixo da lista.
+Cada linha é um botão com identificador à esquerda e etiqueta de estado à direita. As etiquetas combinam texto escuro e fundo suave verde, vermelho ou âmbar, com preenchimento de 3px por 7px e canto `badge`. A cor dos contadores permanece independente da variante da etiqueta. A seleção usa `space-selected-border` e `space-selected`; quando também focada, recebe `primary-focus` e `space-focus`. Selecionar a linha destaca a mesma região no vídeo e mostra o índice de textura detectada e, quando houver, o motivo da análise conjunta em uma área de detalhe com fundo azul-claro abaixo da lista.
 
 ### Marcações no vídeo
 
-As regiões cadastradas recebem a cor de estado e uma etiqueta escura com identificador e estado. A seleção reforça contorno e preenchimento. Com até 12 regiões, as etiquetas têm altura de 21px e largura ajustada ao texto. No mapa completo de 68 vagas, etiquetas de 16px com fonte Manrope de 10px mostram só o identificador dentro de cada retângulo; a vaga selecionada mostra o estado por extenso com 12px/21px. O preenchimento não selecionado usa alfa 24 para preservar a imagem. A imagem permanece dominante; marcações podem ser ocultadas pelo controle “Marcações”, cujo estado ativo recebe fundo e borda azuis discretos.
+As regiões cadastradas recebem a cor de estado e uma etiqueta escura com identificador e estado. A seleção reforça contorno e preenchimento. Com até 12 regiões, as etiquetas têm altura de 21px e largura ajustada ao texto. No mapa completo de 71 regiões, etiquetas de 16px com fonte Manrope de 10px mostram só o identificador dentro de cada retângulo; em retângulos com altura de tela inferior a 20px, a etiqueta fica logo acima para não invadir a região seguinte; a vaga selecionada mostra o estado por extenso com 12px/21px. O preenchimento não selecionado usa alfa 24 para preservar a imagem. A imagem permanece dominante; marcações podem ser ocultadas pelo controle “Marcações”, cujo estado ativo recebe fundo e borda azuis discretos.
 
 Estados de preparação e falha ocupam a própria área escura do vídeo, com título claro e explicação secundária. Durante o processamento, contadores mostram um travessão e os controles dependentes ficam desabilitados.
 
