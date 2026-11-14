@@ -127,6 +127,7 @@ class AppWindowTests(unittest.TestCase):
                 self.assertEqual(window.session.frame_count,679)
                 self.assertTrue(window.play_button.isEnabled())
                 self.assertEqual(window.free_value.text(),'2')
+                self.assertEqual(window.selection_detail.text(),'Selecione uma vaga para destacá-la no vídeo.')
                 self.assertTrue((Path(tmp)/'avaliacao.json').is_file())
             finally:window.close()
 

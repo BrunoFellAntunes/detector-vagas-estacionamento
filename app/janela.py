@@ -254,6 +254,7 @@ class MainWindow(QMainWindow):
             contents.addWidget(name_label);contents.addStretch(1);contents.addWidget(state_label)
             self.space_rows[name]=row;self.state_labels[name]=state_label;self.rows_layout.addWidget(row)
         self.video.selected_space=None
+        self.selection_detail.setText('Selecione uma vaga para destacá-la no vídeo.')
         self.seek_slider.setMaximum(session.frame_count-1)
         self.busy.hide();self.reprocess_button.setEnabled(True)
         self._enable_controls(True)
