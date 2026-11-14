@@ -14,13 +14,13 @@ O projeto investiga a dificuldade de consultar rapidamente quais vagas de um est
 
 O protótipo foi verificado com dados simulados e executa uma demonstração com cinco vagas cadastradas em uma filmagem real de terceiros. A amostra visualmente rotulada do clipe permite uma conferência exploratória; não representa validação independente em outros estacionamentos. A coleta própria e a avaliação em outras gravações são acompanhadas nas [issues do projeto](https://github.com/VitorRodi/detector-vagas-estacionamento/issues). O vídeo final do grupo ainda não foi gravado ou publicado. A entrega exigida é um link do YouTube acessível e este repositório público.
 
-![Demonstração com seis vagas simuladas](assets/demonstracao_simulada.png)
+![Aplicativo Vaga: vídeo e disponibilidade de cinco vagas monitoradas](assets/aplicativo.png)
 
-![Cinco vagas monitoradas no vídeo real de terceiros](assets/demonstracao_real.png)
+A janela nativa apresenta contadores, seleção e filtros por estado, histórico de alterações, reprodução com busca e velocidade ajustável, tela cheia e exportação dos resultados. Depois da instalação, funciona localmente sem internet. A demonstração usa uma gravação incluída no projeto.
 
 ## Tecnologias e método
 
-Python 3.10 ou mais recente, NumPy e OpenCV. O método utiliza tons de cinza, filtro gaussiano, diferença absoluta contra uma referência vazia, limiarização, abertura morfológica, máscaras poligonais e confirmação temporal. **Não utiliza modelo treinado, rede neural ou pesos externos.**
+Python 3.10 ou mais recente, NumPy, OpenCV e PySide6 (Qt para a interface). O método utiliza tons de cinza, filtro gaussiano, diferença absoluta contra uma referência vazia, limiarização, abertura morfológica, máscaras poligonais e confirmação temporal. **Não utiliza modelo treinado, rede neural ou pesos externos.**
 
 ## O que funciona
 
@@ -28,14 +28,31 @@ Python 3.10 ou mais recente, NumPy e OpenCV. O método utiliza tons de cinza, fi
 - Comparação com uma foto fixa em que **todas as vagas cadastradas estejam vazias**.
 - Classificação por fração de pixels alterados, com dois limiares e confirmação temporal.
 - Entrada por imagem, vídeo ou câmera local; marcação por cores e contagem de estados.
-- Exportação de CSV e imagem ou vídeo anotado.
+- Interface nativa com contagem sincronizada ao quadro, filtros, seleção e histórico.
+- Exportação de CSV, imagem ou vídeo anotado e pacote ZIP dos resultados.
 - Demonstração simulada reproduzível e testes de comportamento.
 
 Este programa mede alterações de aparência. Não reconhece semanticamente carros e pode confundir sombras, pessoas e objetos com ocupação. Não foi validado em estacionamento real.
 
-## Instalar e executar no Windows
+## Abrir o aplicativo no Windows
 
-Abra o terminal **nesta pasta**, com Python 3.10 ou mais recente:
+Com Python 3.10 ou mais recente instalado, dê dois cliques em **[INICIAR_APLICATIVO.bat](INICIAR_APLICATIVO.bat)**. O iniciador cria o ambiente local e instala as dependências se necessário; essa primeira instalação precisa de internet. Em seguida, abre a janela e processa os 679 quadros da gravação. Aguarde a mensagem de análise pronta e clique em **Reproduzir**.
+
+Para instalar e abrir pelo terminal:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-app.txt
+.\.venv\Scripts\python.exe aplicativo.py
+```
+
+Use **Apresentar** ou F11 para tela cheia; Esc sai da tela cheia; na janela normal, pausa a reprodução. O filtro mostra vagas livres, ocupadas ou em análise; clicar em uma vaga destaca sua região. O histórico permite voltar ao quadro de uma alteração. **Reprocessar** executa o detector novamente e **Exportar resultados** salva um ZIP. Os contadores sempre incluem as cinco vagas monitoradas, mesmo com um filtro aplicado.
+
+Para abrir uma análise completa já salva, use `.\.venv\Scripts\python.exe aplicativo.py --usar-resultados`. Os controles, arquivos e solução de problemas estão em [docs/APLICATIVO.md](docs/APLICATIVO.md).
+
+## Executar o detector pelo terminal
+
+A interface é opcional. Para usar apenas o detector, abra o terminal **nesta pasta**, com Python 3.10 ou mais recente:
 
 ```powershell
 py -m venv .venv
@@ -107,13 +124,16 @@ CSV: `quadro`, `tempo_video_s`, `vaga`, `estado`, `fracao_alterada`. O tempo é 
 .\.venv\Scripts\python.exe verificar_demo.py
 ```
 
-A suíte contém 20 testes, incluindo uma execução completa do vídeo real a partir de outra pasta e rejeição de clipes incompletos. Rode `verificar_demo.py` depois de gerar e processar o vídeo simulado. A simulação possui 240 quadros, 6 vagas e 1.440 decisões: 1.408 concordantes com o gabarito, 24 indefinidas na inicialização e 8 divergentes durante a confirmação de transições. A concordância de 97,78% descreve **apenas essa simulação**, não a precisão em campo. O verificador reabre o vídeo anotado, decodifica seus 240 quadros e gera `resultados/verificacao_demo.json`. O GitHub Actions repete a suíte e os cenários simulado e real em Windows e Linux.
+A suíte completa contém 36 testes, incluindo execução do vídeo real a partir de outra pasta, rejeição de clipes incompletos, sincronização de estados, navegação, reprodução, recuperação após falha de leitura, exportação e encerramento do processamento na janela. Instale `requirements-app.txt` para executar também os testes de Qt; com somente `requirements.txt`, esses testes são omitidos. Rode `verificar_demo.py` depois de gerar e processar o vídeo simulado. A simulação possui 240 quadros, 6 vagas e 1.440 decisões: 1.408 concordantes com o gabarito, 24 indefinidas na inicialização e 8 divergentes durante a confirmação de transições. A concordância de 97,78% descreve **apenas essa simulação**, não a precisão em campo. O verificador reabre o vídeo anotado, decodifica seus 240 quadros e gera `resultados/verificacao_demo.json`. O GitHub Actions repete a suíte e os cenários simulado e real em Windows e Linux.
 
 No clipe real, os 679 quadros geram 3.395 decisões sobre cinco regiões. A amostra rotulada contém 60 pares de quadro e vaga: 54 concordantes, cinco indefinidos na inicialização e um falso positivo na confirmação de uma saída. A concordância total da amostra é 90%, e a cobertura é 91,67%. Os detalhes e a matriz de confusão estão em [EXPERIMENTO_REAL.md](docs/EXPERIMENTO_REAL.md). Não extrapolar essas medidas para outros vídeos.
 
 ## Estrutura
 
 ```text
+aplicativo.py               Janela nativa de apresentação
+INICIAR_APLICATIVO.bat      Iniciador do aplicativo no Windows
+app/                       Interface, reprodução e leitura dos resultados
 detector.py                 Classificação, anotação e exportação
 calibrar.py                 Cadastro manual das vagas
 demo.py                     Geração do cenário simulado e do gabarito
@@ -121,12 +141,14 @@ extrair_referencia.py       Extração de quadro para calibração real
 verificar_demo.py           Conferência independente da saída simulada
 executar_exemplo.py         Execução e avaliação do vídeo real em um comando
 avaliar.py                  Métricas a partir de rótulos por quadro e vaga
-requirements.txt           Dependências
+requirements.txt           Dependências do detector
+requirements-app.txt       Dependências da interface nativa
 tests/                     Testes de comportamento
 dados/                     Entradas simuladas reproduzíveis
 dados/terceiros/            Filmagem externa e registro de origem
 assets/                    Imagem da demonstração
 docs/COLETA_REAL.md         Como gravar e registrar imagens reais
+docs/APLICATIVO.md          Instalação, controles e apresentação na janela
 docs/ROTEIRO_VIDEO.md       Roteiro com participação dos quatro integrantes
 docs/ENTREGA.md             Critérios e conferência dos links finais
 docs/EXPERIMENTO_REAL.md    Regiões, rótulos, resultados e limitações

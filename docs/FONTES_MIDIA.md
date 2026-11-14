@@ -23,3 +23,12 @@ Este material é uma entrada externa para testes. Não foi gravado pelo grupo, n
 ## Demonstração simulada
 
 As imagens, o vídeo e o gabarito em `dados/` são gerados por `demo.py`. A imagem em `assets/demonstracao_simulada.png` mostra o resultado do processamento dessa simulação. Esses arquivos permanecem separados da filmagem externa e das futuras gravações do grupo.
+
+
+## Interface e tipografia
+
+`assets/aplicativo.png` é uma captura da janela real implementada neste repositório, em 1440 × 900, mostrando o quadro 60 da filmagem externa. Os polígonos e estados vêm dos resultados do detector. A captura não é uma montagem nem uma comprovação de desempenho em outras gravações. As três imagens em `assets/` também carregam um registro de origem em seus metadados PNG.
+
+As fontes locais [Sora](https://github.com/google/fonts/tree/main/ofl/sora) e [Manrope](https://github.com/google/fonts/tree/main/ofl/manrope) foram obtidas do repositório oficial Google Fonts. São redistribuídas sob a SIL Open Font License, com os textos de licença em `app/fonts/Sora-OFL.txt` e `app/fonts/Manrope-OFL.txt`. Os arquivos TTF são carregados localmente pela interface; não há busca de fontes durante o uso.
+
+Os ícones SVG e o símbolo P da janela são desenhados no código do aplicativo.

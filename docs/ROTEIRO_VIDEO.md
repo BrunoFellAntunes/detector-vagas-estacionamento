@@ -29,7 +29,7 @@ Mostrar uma foto autorizada do contexto e o objetivo do projeto. Transição: �
 
 Mostrar brevemente `detector.py` e o diagrama verbal: câmera fixa → tons de cinza e suavização → diferença para referência vazia → máscara de cada vaga → fração de pixels alterados → confirmação temporal → contagem e registro.
 
-Fala central: “Usamos Python, OpenCV e NumPy. Não treinamos uma rede neural. Cadastramos as vagas manualmente e medimos quanto sua aparência muda em relação a uma imagem vazia. O valor exibido é uma fração de pixels alterados, não uma probabilidade de haver um carro.”
+Fala central: “Usamos Python, OpenCV e NumPy, com PySide6 para a janela nativa. Não treinamos uma rede neural. Cadastramos as vagas manualmente e medimos quanto sua aparência muda em relação a uma imagem vazia. O valor exibido é uma fração de pixels alterados, não uma probabilidade de haver um carro.”
 
 Explicar os dois limiares e os cinco quadros de confirmação. Justificar a referência fixa: um veículo que permanece parado deve continuar sendo percebido como ocupação. Explicar que alterações de sombra também podem causar erro. Transição: “Agora vamos executar o programa e acompanhar o que acontece em cada vaga.”
 
@@ -37,7 +37,7 @@ Explicar os dois limiares e os cinco quadros de confirmação. Justificar a refe
 
 Mostrar a referência vazia e o arquivo de polígonos. Abrir a calibração, selecionar uma vaga, confirmar e explicar como o JSON registra a resolução e as coordenadas. Usar uma cópia de configuração no ensaio para preservar a versão demonstrada.
 
-Executar o detector no terminal e mostrar a saída anotada, com um estado livre e outro ocupado. Explicar o significado de verde, vermelho e amarelo. Demonstrar que a contagem acompanha os estados e que uma alteração fora de uma região não deveria mudar aquela vaga.
+Abrir `INICIAR_APLICATIVO.bat`, aguardar a análise e mostrar a janela Vaga com dois estados livres e três ocupados. Mostrar Reprocessar, que executa novamente o detector, e o botão Reproduzir. Explicar o significado de verde, vermelho e amarelo. Demonstrar que a contagem acompanha os estados e que uma alteração fora de uma região não deveria mudar aquela vaga.
 
 Para ensaiar com dados simulados:
 
@@ -46,13 +46,13 @@ Para ensaiar com dados simulados:
 .\.venv\Scripts\python.exe detector.py --source dados/cena_simulada.png --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/imagem --show
 ```
 
-O exemplo real já cadastrado pode ser aberto com `.\.venv\Scripts\python.exe executar_exemplo.py --show`. Ele monitora cinco regiões do vídeo de terceiros; explicar a origem, a referência do quadro 678 e a seleção das regiões conforme `EXPERIMENTO_REAL.md`. A janela pode ser pausada com espaço para explicar as saídas. Para uma gravação própria, seguir `COLETA_REAL.md`. Mostrar o comando completo e pelo menos um trecho do processamento. A demonstração deve usar o mesmo código publicado no GitHub.
+O exemplo real já cadastrado abre em uma janela nativa com `.\.venv\Scripts\python.exe aplicativo.py`. O comando `executar_exemplo.py --show` continua disponível para demonstrar o detector diretamente. Ele monitora cinco regiões do vídeo de terceiros; explicar a origem, a referência do quadro 678 e a seleção das regiões conforme `EXPERIMENTO_REAL.md`. Na interface Vaga, usar Reproduzir/Pausar e a barra de posição para explicar as saídas. O botão Apresentar abre tela cheia; Esc retorna à janela. Veja [APLICATIVO.md](APLICATIVO.md) para o percurso de ensaio. Para uma gravação própria, seguir `COLETA_REAL.md`. Mostrar o comando completo e pelo menos um trecho do processamento. A demonstração deve usar o mesmo código publicado no GitHub.
 
 ## Edson Leandro Soares continua a demonstração
 
-Mostrar uma entrada de veículo e uma saída. Destacar os cinco quadros de confirmação e o pequeno atraso introduzido. Mostrar um veículo parado mantendo o estado ocupado. Se a coleta tiver falhas com sombras, mostrar um exemplo e explicar a limitação.
+Na gravação externa, mostrar as saídas de V01, V02 e V03, confirmadas nos quadros 147, 222 e 361. Essa gravação não contém entradas nas cinco regiões monitoradas; para demonstrar uma entrada, usar a simulação identificada ou a coleta própria. Destacar os cinco quadros de confirmação e o pequeno atraso introduzido. Mostrar um veículo parado mantendo o estado ocupado. Se a coleta tiver falhas com sombras, mostrar um exemplo e explicar a limitação.
 
-Abrir `ocupacao.csv` e explicar quadro, tempo estimado, vaga, estado e fração alterada. Abrir o vídeo exportado. Não apresentar o FPS do arquivo como velocidade medida do algoritmo.
+Na janela Vaga, selecionar uma vaga, aplicar Somente livres e voltar a uma mudança pelo histórico. Usar Exportar resultados, extrair o ZIP, abrir `ocupacao.csv` e explicar quadro, tempo estimado, vaga, estado e fração alterada. Abrir o vídeo exportado. Não apresentar o FPS do arquivo como velocidade medida do algoritmo.
 
 Para ensaio reproduzível:
 
@@ -76,7 +76,7 @@ Edson: concluir o que foi demonstrado e mostrar o repositório público. Informa
 ## Conferência antes de gravar
 
 - Ensaiar o percurso com os quatro integrantes e cronometrar.
-- Testar microfones, volume e captura da tela; deixar o texto do terminal legível.
+- Testar microfones, volume e captura da tela; deixar a janela do aplicativo e qualquer texto do terminal legíveis.
 - Fechar abas pessoais e notificações antes da captura.
 - Mostrar entradas, programa e saídas em vez de apresentar exclusivamente slides.
 - Gravar as próprias falas. Cada integrante deve conseguir explicar o trecho apresentado e responder perguntas.
