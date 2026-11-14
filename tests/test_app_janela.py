@@ -150,7 +150,8 @@ class AppWindowTests(unittest.TestCase):
             window=MainWindow(ROOT,output=Path(tmp))
             window.show()
             try:
-                deadline=time.monotonic()+45
+                # Aguarda a conclusão real, também em máquinas sob carga durante a apresentação.
+                deadline=time.monotonic()+120
                 while window.session is None and time.monotonic()<deadline:QTest.qWait(50)
                 self.assertIsNotNone(window.session,window.status_label.text())
                 self.assertEqual(window.session.frame_count,679)

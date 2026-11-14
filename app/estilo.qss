@@ -70,3 +70,12 @@ QTextBrowser { background: transparent; border: 0; padding: 12px; selection-back
 QScrollBar:vertical { width: 8px; background: transparent; margin: 2px; }
 QScrollBar::handle:vertical { background: #bdcbdf; border-radius: 3px; min-height: 24px; }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+QWidget#map_editor { background: #eef2f7; }
+QScrollArea#editor_settings, QWidget#editor_settings_content { background: #ffffff; border-radius: 12px; }
+QWidget#map_editor QPushButton { padding: 6px 9px; }
+QLineEdit, QDoubleSpinBox { background: #f8faff; border: 2px solid #dbe3ee; border-radius: 7px; padding: 6px; min-height: 18px; selection-background-color: #dce7ff; }
+QLineEdit:focus, QDoubleSpinBox:focus { border-color: #486bd5; }
+QListWidget#editor_spaces { background: #f8faff; border: 2px solid #e5ebf3; border-radius: 7px; outline: 0; }
+QListWidget#editor_spaces::item { padding: 7px 9px; }
+QListWidget#editor_spaces::item:selected { background: #e2ebff; color: #203e77; }
+QListWidget#editor_spaces:focus { border-color: #486bd5; }

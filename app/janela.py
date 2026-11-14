@@ -4,6 +4,7 @@ import sys
 import json
 import os
 import subprocess
+from html import escape
 
 from PySide6.QtCore import Qt,QProcess,QProcessEnvironment,QSignalBlocker,QTimer
 from PySide6.QtGui import QColor,QFont,QFontDatabase,QKeySequence,QPainter,QPixmap,QIcon,QShortcut
@@ -60,16 +61,19 @@ def time_text(seconds):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self,root,session=None,output=None):
+    def __init__(self,root,session=None,output=None,profile=None):
         super().__init__()
         self.root=Path(root)
-        self.output=Path(output) if output else self.root/'resultados/carpark'
+        self._demo_output=Path(output) if output else self.root/'resultados/carpark'
+        self.active_profile=profile or (session.profile if session else None)
+        self.output=self.active_profile.output if self.active_profile else self._demo_output
         self.session=None
         self.controller=None
         self._closing=False
         self._last_history=None
         self._state_cache={}
         self._process_log=''
+        self.editor=None
         self.process=QProcess(self)
         self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         environment=QProcessEnvironment.systemEnvironment()
@@ -105,11 +109,17 @@ class MainWindow(QMainWindow):
         side.addSpacing(24)
         self.nav_monitor=button('Monitoramento','grid','nav');self.nav_monitor.setCheckable(True)
         self.nav_about=button('Sobre o projeto','info','nav');self.nav_about.setCheckable(True)
-        group=QButtonGroup(self);group.setExclusive(True);group.addButton(self.nav_monitor);group.addButton(self.nav_about)
+        self.editor_button=button('Vídeos e vagas','edit','nav');self.editor_button.setCheckable(True)
+        self.editor_button.clicked.connect(self.open_editor)
+        self.demo_button=button('Demonstração','play','nav');self.demo_button.clicked.connect(lambda:self.use_profile(None))
+        self.demo_button.setToolTip('Voltar ao vídeo de demonstração incluído no projeto')
+        group=QButtonGroup(self);group.setExclusive(True)
+        for item in [self.nav_monitor,self.editor_button,self.nav_about]:group.addButton(item)
         self.nav_monitor.setChecked(True)
         self.nav_monitor.clicked.connect(lambda:self.switch_page(0))
         self.nav_about.clicked.connect(lambda:self.switch_page(1))
-        side.addWidget(self.nav_monitor);side.addWidget(self.nav_about);side.addStretch(1)
+        side.addWidget(self.nav_monitor);side.addWidget(self.editor_button);side.addWidget(self.demo_button)
+        side.addWidget(self.nav_about);side.addStretch(1)
         side.addWidget(label('Últimas alterações','section_title'))
         self.history_empty=label('As mudanças aparecem conforme o vídeo avança.','small',True)
         side.addWidget(self.history_empty)
@@ -127,6 +137,7 @@ class MainWindow(QMainWindow):
         titles=QVBoxLayout();titles.setSpacing(4)
         self.heading=label('Disponibilidade de vagas','heading')
         self.subtitle=label('Gravação de demonstração · mapa das vagas','subtitle')
+        self.subtitle.setWordWrap(True);self.subtitle.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred)
         titles.addWidget(self.heading);titles.addWidget(self.subtitle)
         head.addLayout(titles,1)
         self.reprocess_button=button('Reprocessar','refresh','ghost')
@@ -155,7 +166,8 @@ class MainWindow(QMainWindow):
         video_panel=QFrame();video_panel.setObjectName('video_panel')
         vl=QVBoxLayout(video_panel);vl.setContentsMargins(12,12,12,12);vl.setSpacing(9)
         video_head=QHBoxLayout();video_head.addWidget(label('Visão do estacionamento','section_title'))
-        video_head.addStretch(1);video_head.addWidget(label('Vídeo de terceiros','source_badge'))
+        self.source_badge=label('Vídeo de terceiros','source_badge')
+        video_head.addStretch(1);video_head.addWidget(self.source_badge)
         vl.addLayout(video_head)
         self.video=VideoCanvas();self.video.space_clicked.connect(self.select_space)
         vl.addWidget(self.video,1)
@@ -246,6 +258,8 @@ class MainWindow(QMainWindow):
         if self.controller:
             self.controller.close();self.controller.deleteLater()
         self.session=session
+        self.active_profile=session.profile
+        self.output=session.output
         self.controller=PlaybackController(session,self)
         self.controller.frame_changed.connect(self._frame_changed)
         self.controller.playing_changed.connect(self._playing_changed)
@@ -268,8 +282,10 @@ class MainWindow(QMainWindow):
         self.selection_detail.setText('Selecione uma vaga para destacá-la no vídeo.')
         self.seek_slider.setMaximum(session.frame_count-1)
         self.busy.hide();self.reprocess_button.setEnabled(True)
+        self.editor_button.setEnabled(True);self.demo_button.setEnabled(self.active_profile is not None)
         self._enable_controls(True)
-        self.subtitle.setText(f'Gravação de demonstração · {len(session.spaces)} vagas monitoradas')
+        self.subtitle.setText(self._monitor_subtitle())
+        self.source_badge.setText('Vídeo local' if self.active_profile else 'Vídeo de terceiros')
         self.controller.set_speed(float(self.speed_combo.currentData()))
         self.controller.seek(min(60,session.frame_count-1))
         self.play_button.setFocus(Qt.FocusReason.OtherFocusReason)
@@ -361,8 +377,37 @@ class MainWindow(QMainWindow):
     def switch_page(self,index):
         if self.controller:self.controller.pause()
         self.stack.setCurrentIndex(index);self.metric_strip.setVisible(index==0)
-        self.heading.setText('Disponibilidade de vagas' if index==0 else 'Sobre o projeto')
-        self.subtitle.setText((f'Gravação de demonstração · {len(self.session.spaces)} vagas monitoradas' if self.session else 'Gravação de demonstração · mapa das vagas') if index==0 else 'Método, resultados e limites da demonstração')
+        self.heading.setText(['Disponibilidade de vagas','Sobre o projeto','Vídeos e vagas'][index])
+        self.subtitle.setText(self._monitor_subtitle() if index==0 else 'Método, resultados e limites da análise' if index==1 else 'Adicione uma gravação com câmera fixa e marque cada vaga.')
+        self.reprocess_button.setVisible(index!=2);self.presentation_button.setVisible(index!=2)
+        [self.nav_monitor,self.nav_about,self.editor_button][index].setChecked(True)
+
+    def _monitor_subtitle(self):
+        title=self.active_profile.name if self.active_profile else 'Gravação de demonstração'
+        return f'{title} · {len(self.session.spaces)} vagas monitoradas' if self.session else f'{title} · mapa das vagas'
+
+    def open_editor(self):
+        if self.process.state()!=QProcess.ProcessState.NotRunning:return
+        if self.controller:self.controller.pause()
+        if self.editor is None:
+            from app.editor import EditorPanel
+            self.editor=EditorPanel(self.root,profile=self.active_profile,parent=self.stack)
+            self.editor.profile_saved.connect(self.use_profile)
+            self.editor.back_requested.connect(lambda:self.switch_page(0))
+            self.stack.addWidget(self.editor)
+        self.switch_page(2)
+
+    def use_profile(self,profile):
+        if self.process.state()!=QProcess.ProcessState.NotRunning:return
+        try:
+            if profile:profile.validate_source()
+            self.active_profile=profile;self.output=profile.output if profile else self._demo_output
+            self.nav_monitor.setChecked(True);self.switch_page(0)
+            try:
+                session=load_session(self.root,self.output,profile=profile)
+            except (OSError,ValueError,KeyError,TypeError):self.prepare()
+            else:self.set_session(session)
+        except (OSError,ValueError,KeyError,TypeError) as error:self.status_label.setText(str(error))
 
     def toggle_presentation(self):
         if self.isFullScreen():
@@ -375,6 +420,7 @@ class MainWindow(QMainWindow):
 
     def _escape(self):
         if self.isFullScreen():self.toggle_presentation()
+        elif self.editor is not None and self.stack.currentWidget() is self.editor:self.editor.canvas._cancel_drag()
         elif self.controller:self.controller.pause()
 
     def prepare(self):
@@ -383,6 +429,7 @@ class MainWindow(QMainWindow):
             self.controller.close();self.controller.deleteLater();self.controller=None
         self.session=None
         self._enable_controls(False);self.reprocess_button.setEnabled(False)
+        self.editor_button.setEnabled(False);self.demo_button.setEnabled(False)
         self.busy.show();self._process_log=''
         self.history_list.clear();self.history_list.hide();self.history_empty.show()
         self.history_empty.setText('As mudanças aparecem conforme o vídeo avança.')
@@ -391,13 +438,23 @@ class MainWindow(QMainWindow):
             state_label.setText('Aguardando');state_label.setProperty('state',None)
             state_label.style().unpolish(state_label);state_label.style().polish(state_label)
         self._update_about()
-        self.video.clear('Analisando a gravação','O detector está conferindo os 679 quadros do vídeo.')
+        self.subtitle.setText(self._monitor_subtitle())
+        self.source_badge.setText('Vídeo local' if self.active_profile else 'Vídeo de terceiros')
+        self.video.clear('Analisando a gravação','O detector está conferindo as vagas em todos os quadros do vídeo.')
         for value in [self.free_value,self.occupied_value,self.unknown_value]:value.setText('—')
         self.status_label.setText('Processando o vídeo…')
         self.process.setWorkingDirectory(str(self.root))
         data=self.root/'dados/terceiros'
-        self.process.start(sys.executable,[str(self.root/'detector.py'),'--source',str(data/'carPark.mp4'),
-            '--reference',str(data/'referencia_carpark.png'),'--config',str(data/'vagas_completas_carpark.json'),
+        profile=self.active_profile
+        if profile:
+            try:profile.validate_source()
+            except (OSError,ValueError) as error:
+                self._prepare_failed(str(error));return
+        executable=Path(sys.executable)
+        if executable.name.lower()=='pythonw.exe' and executable.with_name('python.exe').is_file():executable=executable.with_name('python.exe')
+        self.process.start(str(executable),[str(self.root/'detector.py'),'--source',str(profile.source if profile else data/'carPark.mp4'),
+            '--reference',str(profile.reference if profile else data/'referencia_carpark.png'),
+            '--config',str(profile.config if profile else data/'vagas_completas_carpark.json'),
             '--output',str(self.output)])
 
     def _read_process(self):
@@ -414,12 +471,13 @@ class MainWindow(QMainWindow):
             from avaliar import evaluate
             data=self.root/'dados/terceiros'
             summary=json.loads((self.output/'resumo.json').read_text(encoding='utf-8'))
-            expected=json.loads((data/'carPark.metadata.json').read_text(encoding='utf-8'))['quadros_decodificados']
+            expected=self.active_profile.frame_count if self.active_profile else json.loads((data/'carPark.metadata.json').read_text(encoding='utf-8'))['quadros_decodificados']
             if summary['quadros_processados']!=expected or summary['interrompido_pelo_usuario']:
                 raise ValueError('O vídeo não foi processado por completo. Tente reprocessar.')
-            evaluation=evaluate(self.output/'ocupacao.csv',data/'rotulos_completos_carpark.csv')
-            (self.output/'avaliacao.json').write_text(json.dumps(evaluation,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-            self.set_session(load_session(self.root,self.output))
+            if not self.active_profile:
+                evaluation=evaluate(self.output/'ocupacao.csv',data/'rotulos_completos_carpark.csv')
+                (self.output/'avaliacao.json').write_text(json.dumps(evaluation,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+            self.set_session(load_session(self.root,self.output,profile=self.active_profile))
         except (OSError,ValueError,KeyError,TypeError) as error:self._prepare_failed(str(error))
 
     def _process_error(self,error):
@@ -428,6 +486,7 @@ class MainWindow(QMainWindow):
 
     def _prepare_failed(self,message):
         self.busy.hide();self.reprocess_button.setEnabled(True)
+        self.editor_button.setEnabled(True);self.demo_button.setEnabled(self.active_profile is not None)
         self.status_label.setText('Não foi possível preparar o vídeo')
         self.video.clear('A análise precisa de atenção',message)
         self.video.setToolTip(self._process_log[-3000:])
@@ -447,7 +506,7 @@ class MainWindow(QMainWindow):
 
     def _update_about(self):
         metrics='A análise ainda está sendo preparada.'
-        if self.session:
+        if self.session and self.session.evaluation:
             evaluation=self.session.evaluation
             coverage=f"{evaluation['cobertura']:.2%}".replace('.',',')
             concordance=f"{evaluation['concordancia_total']:.2%}".replace('.',',')
@@ -455,19 +514,29 @@ class MainWindow(QMainWindow):
                      f"{concordance} de concordância total e "
                      f"{coverage} de cobertura. Estados indefinidos permanecem no denominador. "
                      'A amostra é exploratória e não mede generalização para outros estacionamentos.')
+        elif self.session:
+            metrics='Sem avaliação rotulada para este vídeo. As contagens são saídas do detector; confira as vagas na imagem e ajuste o mapa e os limiares no editor.'
+        description=('Mapa com 71 regiões cadastradas: 69 vagas e duas áreas centrais de ocupação ambígua. '
+            'A região acima da V59 está incluída como V69. A van central abrange V70 e V71: quando um mesmo objeto claro atravessa ambas, elas ficam em análise.')
+        origin='Filmagem de terceiros obtida do repositório de Harsh Bafna. O crédito identifica a fonte de obtenção, não a autoria original da gravação. Mais informações em docs/FONTES_MIDIA.md.'
+        reference_note='O quadro 678 fornece apenas a resolução do exemplo completo; não é uma referência vazia do mapa completo. Regiões e limiares foram calibrados neste mesmo clipe.'
+        if self.active_profile:
+            description=f'Vídeo local do perfil <b>{escape(self.active_profile.name)}</b>. O mapa foi cadastrado no editor para este enquadramento.'
+            origin='Vídeo escolhido localmente pelo usuário. O arquivo permanece na pasta original e não é publicado pelo aplicativo.'
+            reference_note='O quadro escolhido no editor fornece a resolução e a imagem do cadastro; não precisa estar vazio no modo por textura. As vagas precisam ser marcadas para cada enquadramento e os limiares devem ser conferidos visualmente.'
         self.about.setHtml(f'''<html><body style="font-family:Manrope;color:#253b50;font-size:14px;line-height:1.6">
         <h1 style="font-family:Sora;font-size:26px;color:#192f49">Monitoramento inteligente de vagas</h1>
         <p>Projeto de Robótica e Visão Computacional da Unochapecó.<br>Docente: Wagner Titon.</p>
         <h2 style="font-family:Sora;font-size:17px">O que o aplicativo mostra</h2>
-        <p>Mapa com 71 regiões cadastradas: 69 vagas e duas áreas centrais de ocupação ambígua. A janela sincroniza o quadro reproduzido com os estados calculados pelo detector, sem conexão com uma câmera ao vivo. A região acima da V59 está incluída como V69. A van central abrange V70 e V71: quando um mesmo objeto claro atravessa ambas, elas ficam em análise. Ilhas, corredores e áreas fora do enquadramento não entram na contagem.</p>
+        <p>{description} A janela sincroniza o quadro reproduzido com os estados calculados pelo detector, sem conexão com uma câmera ao vivo. Somente as regiões cadastradas são monitoradas.</p>
         <h2 style="font-family:Sora;font-size:17px">Como funciona</h2>
         <p>Python, OpenCV e NumPy medem a densidade de textura dentro de cada vaga usando suavização, limiarização adaptativa, filtro de mediana e dilatação. Dois limiares e cinco quadros consecutivos confirmam o estado, inclusive para carros que ficam parados durante toda a gravação. A interface nativa utiliza Qt. Não há modelo treinado. O percentual de textura não é uma probabilidade de ocupação.</p>
         <h2 style="font-family:Sora;font-size:17px">Resultados e limites</h2><p>{metrics}</p>
-        <p>O quadro 678 fornece apenas a resolução do exemplo completo; não é uma referência vazia do mapa completo. Regiões e limiares foram calibrados neste mesmo clipe. Veículos lisos, pedestres, sombras e oclusões podem causar erros. O experimento anterior por referência vazia continua disponível no terminal. A coleta própria e a avaliação em gravações independentes ainda estão pendentes.</p>
+        <p>{reference_note} Veículos lisos, pedestres, sombras e oclusões podem causar erros. O experimento anterior por referência vazia continua disponível no terminal. A coleta própria e a avaliação em gravações independentes ainda estão pendentes.</p>
         <h2 style="font-family:Sora;font-size:17px">Equipe</h2>
         <p>Vitor Rodi · Pedro Toigo · Bruno Fell Antunes · Edson Leandro Soares</p>
         <h2 style="font-family:Sora;font-size:17px">Origem do vídeo</h2>
-        <p>Filmagem de terceiros obtida do repositório de Harsh Bafna. O crédito identifica a fonte de obtenção, não a autoria original da gravação. Mais informações em docs/FONTES_MIDIA.md.</p>
+        <p>{origin}</p>
         <p><a style="color:#355bd5" href="https://github.com/VitorRodi/detector-vagas-estacionamento">Abrir o repositório do projeto</a></p>
         </body></html>''')
 

@@ -9,6 +9,9 @@ COLORS={'livre':'#31b77b','ocupada':'#ed7168','indefinida':'#efbd54'}
 LABELS={'livre':'Livre','ocupada':'Ocupada','indefinida':'Em análise'}
 
 PATHS={
+ 'undo':'<path d="M9 4 3 10l6 6M3 10h10a7 7 0 0 1 7 7v3"/>',
+ 'redo':'<path d="m15 4 6 6-6 6m6-6H11a7 7 0 0 0-7 7v3"/>',
+ 'edit':'<path d="m16 3 5 5-12 12H4v-5L16 3Zm-3 3 5 5M4 21h17"/>',
  'play':'<path d="m8 5 11 7-11 7z"/>',
  'pause':'<path d="M8 5v14M16 5v14"/>',
  'restart':'<path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/>',
