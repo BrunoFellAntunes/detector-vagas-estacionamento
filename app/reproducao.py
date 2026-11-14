@@ -13,7 +13,7 @@ class PlaybackController(QObject):
         self.session=session
         self.capture=cv2.VideoCapture(str(session.source))
         if not self.capture.isOpened():
-            raise ValueError('Não foi possível abrir a gravação. Confira o arquivo carPark.mp4.')
+            raise ValueError('Não foi possível abrir a gravação. Confira o arquivo de vídeo deste estacionamento.')
         self.index=-1
         self._next_capture_index=0
         self.playing=False

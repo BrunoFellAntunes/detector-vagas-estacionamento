@@ -13,6 +13,7 @@ Thumbs.db
 *.docx
 *.pdf
 resultados/
+perfis/
 
 # Registros de campo: revisar a permissão de publicação antes de versionar
 dados/reais/

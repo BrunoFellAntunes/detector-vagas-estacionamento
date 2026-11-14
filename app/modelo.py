@@ -22,6 +22,7 @@ class Session:
     events: list
     summary: dict
     evaluation: dict
+    profile: object = None
 
     @property
     def frame_count(self):
@@ -55,22 +56,30 @@ class Session:
                              'ultimo_quadro.png','video_anotado.mp4']:
                     source=self.output/name
                     if source.is_file():archive.write(source,name)
+                if self.profile:
+                    archive.write(self.profile.config,'mapa.json')
+                    archive.write(self.profile.reference,'referencia.png')
             temporary.replace(target)
         finally:
             temporary.unlink(missing_ok=True)
 
 
-def load_session(root,output=None):
+def load_session(root,output=None,profile=None):
     root=Path(root)
     data=root/'dados/terceiros'
-    output=Path(output) if output is not None else root/'resultados/carpark'
-    config_path=data/'vagas_completas_carpark.json'
-    if not config_path.is_file():config_path=data/'vagas_carpark.json'
+    output=Path(output) if output is not None else profile.output if profile else root/'resultados/carpark'
+    if profile:
+        profile.validate_source()
+        config_path=profile.config;source=profile.source;count=profile.frame_count
+    else:
+        source=data/'carPark.mp4'
+        config_path=data/'vagas_completas_carpark.json'
+        if not config_path.is_file():config_path=data/'vagas_carpark.json'
+        metadata=json.loads((data/'carPark.metadata.json').read_text(encoding='utf-8'))
+        count=metadata['quadros_decodificados']
     config=json.loads(config_path.read_text(encoding='utf-8'))
-    metadata=json.loads((data/'carPark.metadata.json').read_text(encoding='utf-8'))
     summary=json.loads((output/'resumo.json').read_text(encoding='utf-8'))
-    evaluation=json.loads((output/'avaliacao.json').read_text(encoding='utf-8'))
-    count=metadata['quadros_decodificados']
+    evaluation={} if profile else json.loads((output/'avaliacao.json').read_text(encoding='utf-8'))
     fps=float(summary['fps_informado_fonte'])
     spaces=config['spaces']
     ids=[space['id'] for space in spaces]
@@ -80,8 +89,8 @@ def load_session(root,output=None):
         raise ValueError('A análise está incompleta ou não corresponde às vagas cadastradas. Reprocesse o vídeo.')
     if summary.get('metodo','reference')!=config.get('method','reference'):
         raise ValueError('O método da análise difere da configuração. Reprocesse o vídeo.')
-    if not (data/'carPark.mp4').is_file():
-        raise ValueError('O vídeo do exemplo não está disponível.')
+    if not source.is_file():
+        raise ValueError('O vídeo não está disponível.')
     frames=[{} for _ in range(count)]
     with (output/'ocupacao.csv').open(encoding='utf-8',newline='') as stream:
         for row in csv.DictReader(stream):
@@ -108,5 +117,5 @@ def load_session(root,output=None):
             events.append({'frame':index,'time':index/fps,'space':name,
                            'previous':row['estado_anterior'],'state':row['estado_atual']})
     events.sort(key=lambda item:item['frame'])
-    return Session(data/'carPark.mp4',output,int(config['width']),int(config['height']),
-                   fps,spaces,snapshots,events,summary,evaluation)
+    return Session(source,output,int(config['width']),int(config['height']),
+                   fps,spaces,snapshots,events,summary,evaluation,profile)
