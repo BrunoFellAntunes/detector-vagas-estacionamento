@@ -27,6 +27,10 @@ class Session:
     def frame_count(self):
         return len(self.frames)
 
+    @property
+    def method(self):
+        return self.summary.get('metodo','reference')
+
     def snapshot(self,index):
         if not 0<=index<self.frame_count:
             raise ValueError('Quadro fora da gravação.')
@@ -60,7 +64,9 @@ def load_session(root,output=None):
     root=Path(root)
     data=root/'dados/terceiros'
     output=Path(output) if output is not None else root/'resultados/carpark'
-    config=json.loads((data/'vagas_carpark.json').read_text(encoding='utf-8'))
+    config_path=data/'vagas_completas_carpark.json'
+    if not config_path.is_file():config_path=data/'vagas_carpark.json'
+    config=json.loads(config_path.read_text(encoding='utf-8'))
     metadata=json.loads((data/'carPark.metadata.json').read_text(encoding='utf-8'))
     summary=json.loads((output/'resumo.json').read_text(encoding='utf-8'))
     evaluation=json.loads((output/'avaliacao.json').read_text(encoding='utf-8'))
@@ -72,6 +78,8 @@ def load_session(root,output=None):
             summary.get('interrompido_pelo_usuario') or summary['quadros_processados']!=count or
             summary['vagas_monitoradas']!=len(ids) or count<1):
         raise ValueError('A análise está incompleta ou não corresponde às vagas cadastradas. Reprocesse o vídeo.')
+    if summary.get('metodo','reference')!=config.get('method','reference'):
+        raise ValueError('O método da análise difere da configuração. Reprocesse o vídeo.')
     if not (data/'carPark.mp4').is_file():
         raise ValueError('O vídeo do exemplo não está disponível.')
     frames=[{} for _ in range(count)]
@@ -80,7 +88,8 @@ def load_session(root,output=None):
             index=int(row['quadro'])
             name=row['vaga']
             state=row['estado']
-            ratio=float(row['fracao_alterada'])
+            measure='densidade_textura' if summary.get('metodo')=='texture' else 'fracao_alterada'
+            ratio=float(row[measure])
             if (not 0<=index<count or name not in ids or state not in STATES or
                     not math.isfinite(ratio) or not 0<=ratio<=1 or name in frames[index]):
                 raise ValueError('Registro de ocupação inválido, duplicado ou fora da gravação.')

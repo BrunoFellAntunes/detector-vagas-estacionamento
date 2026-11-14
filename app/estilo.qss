@@ -18,6 +18,7 @@ QLabel#metric_occupied { color: #b34f48; }
 QLabel#metric_unknown { color: #966719; }
 QLabel#metric_label { color: #425a74; font-size: 13px; }
 QFrame#divider { background: #e2e8f1; max-width: 1px; }
+QWidget#spaces_viewport, QWidget#space_rows { background: #ffffff; }
 QLabel#source_badge { color: #425b77; background: #edf2f8; padding: 5px 8px; border-radius: 5px; font-size: 11px; }
 QLabel#selection_detail { color: #425b77; background: #f1f5fb; padding: 10px; border-radius: 8px; font-size: 12px; }
 QPushButton { background: #ffffff; border: 2px solid #dbe3ee; border-radius: 8px; padding: 8px 11px; font-weight: 600; min-height: 20px; }

@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt,QProcess,QProcessEnvironment,QSignalBlocker,QTimer
 from PySide6.QtGui import QColor,QFont,QFontDatabase,QKeySequence,QPainter,QPixmap,QIcon,QShortcut
 from PySide6.QtWidgets import (QApplication,QButtonGroup,QComboBox,QFileDialog,QFrame,
     QHBoxLayout,QLabel,QListWidget,QListWidgetItem,QMainWindow,QProgressBar,QPushButton,
-    QSizePolicy,QSlider,QStackedWidget,QTextBrowser,QVBoxLayout,QWidget)
+    QScrollArea,QSizePolicy,QSlider,QStackedWidget,QTextBrowser,QVBoxLayout,QWidget)
 
 from app.componentes import VideoCanvas,icon
 from app.modelo import LABELS,load_session
@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
         head=QHBoxLayout();head.setSpacing(10)
         titles=QVBoxLayout();titles.setSpacing(4)
         self.heading=label('Disponibilidade de vagas','heading')
-        self.subtitle=label('Gravação de demonstração · cinco regiões monitoradas','subtitle')
+        self.subtitle=label('Gravação de demonstração · mapa das vagas','subtitle')
         titles.addWidget(self.heading);titles.addWidget(self.subtitle)
         head.addLayout(titles,1)
         self.reprocess_button=button('Reprocessar','refresh','ghost')
@@ -194,11 +194,19 @@ class MainWindow(QMainWindow):
             self.filter_combo.addItem(text,value)
         self.filter_combo.currentIndexChanged.connect(self._apply_filter)
         sl.addWidget(self.filter_combo)
-        self.rows_layout=QVBoxLayout();self.rows_layout.setSpacing(7);sl.addLayout(self.rows_layout)
+        self.space_scroll=QScrollArea();self.space_scroll.setWidgetResizable(True)
+        self.space_scroll.viewport().setObjectName('spaces_viewport')
+        self.space_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.space_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.space_scroll.setAccessibleName('Lista de todas as vagas monitoradas')
+        rows_widget=QWidget();rows_widget.setObjectName('space_rows');self.rows_layout=QVBoxLayout(rows_widget)
+        self.rows_layout.setContentsMargins(0,0,5,0);self.rows_layout.setSpacing(7)
+        self.rows_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.space_scroll.setWidget(rows_widget);sl.addWidget(self.space_scroll,1)
         self.empty_spaces=label('Nenhuma vaga neste estado no quadro atual.','muted',True);self.empty_spaces.hide()
         sl.addWidget(self.empty_spaces)
         self.selection_detail=label('Selecione uma vaga para destacá-la no vídeo.','selection_detail',True)
-        self.selection_detail.setMinimumHeight(40);sl.addWidget(self.selection_detail);sl.addStretch(1)
+        self.selection_detail.setMinimumHeight(40);sl.addWidget(self.selection_detail)
         self.export_button=button('Exportar resultados','download');self.export_button.clicked.connect(self.export_results)
         sl.addWidget(self.export_button)
         body.addWidget(spaces_panel)
@@ -340,7 +348,8 @@ class MainWindow(QMainWindow):
         name=self.video.selected_space
         if not name or not self.controller:return
         result=next(r for r in self.session.snapshot(self.controller.index) if r['id']==name)
-        self.selection_detail.setText(f"{name} · {LABELS[result['state']]}\nÁrea alterada: {result['ratio']:.0%}")
+        measure='Textura detectada' if self.session.method=='texture' else 'Área alterada'
+        self.selection_detail.setText(f"{name} · {LABELS[result['state']]}\n{measure}: {result['ratio']:.0%}")
 
     def jump_to_event(self,item):
         if not self.controller:return
@@ -351,7 +360,7 @@ class MainWindow(QMainWindow):
         if self.controller:self.controller.pause()
         self.stack.setCurrentIndex(index);self.metric_strip.setVisible(index==0)
         self.heading.setText('Disponibilidade de vagas' if index==0 else 'Sobre o projeto')
-        self.subtitle.setText('Gravação de demonstração · cinco regiões monitoradas' if index==0 else 'Método, resultados e limites da demonstração')
+        self.subtitle.setText((f'Gravação de demonstração · {len(self.session.spaces)} vagas monitoradas' if self.session else 'Gravação de demonstração · mapa das vagas') if index==0 else 'Método, resultados e limites da demonstração')
 
     def toggle_presentation(self):
         if self.isFullScreen():
@@ -386,7 +395,7 @@ class MainWindow(QMainWindow):
         self.process.setWorkingDirectory(str(self.root))
         data=self.root/'dados/terceiros'
         self.process.start(sys.executable,[str(self.root/'detector.py'),'--source',str(data/'carPark.mp4'),
-            '--reference',str(data/'referencia_carpark.png'),'--config',str(data/'vagas_carpark.json'),
+            '--reference',str(data/'referencia_carpark.png'),'--config',str(data/'vagas_completas_carpark.json'),
             '--output',str(self.output)])
 
     def _read_process(self):
@@ -406,7 +415,7 @@ class MainWindow(QMainWindow):
             expected=json.loads((data/'carPark.metadata.json').read_text(encoding='utf-8'))['quadros_decodificados']
             if summary['quadros_processados']!=expected or summary['interrompido_pelo_usuario']:
                 raise ValueError('O vídeo não foi processado por completo. Tente reprocessar.')
-            evaluation=evaluate(self.output/'ocupacao.csv',data/'rotulos_carpark.csv')
+            evaluation=evaluate(self.output/'ocupacao.csv',data/'rotulos_completos_carpark.csv')
             (self.output/'avaliacao.json').write_text(json.dumps(evaluation,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
             self.set_session(load_session(self.root,self.output))
         except (OSError,ValueError,KeyError,TypeError) as error:self._prepare_failed(str(error))
@@ -439,19 +448,20 @@ class MainWindow(QMainWindow):
         if self.session:
             evaluation=self.session.evaluation
             coverage=f"{evaluation['cobertura']:.2%}".replace('.',',')
+            concordance=f"{evaluation['concordancia_total']:.2%}".replace('.',',')
             metrics=(f"<b>{evaluation['amostras']} rótulos visuais</b> conferidos no mesmo clipe: "
-                     f"{evaluation['concordancia_total']:.0%} de concordância total e "
+                     f"{concordance} de concordância total e "
                      f"{coverage} de cobertura. Estados indefinidos permanecem no denominador. "
                      'A amostra é exploratória e não mede generalização para outros estacionamentos.')
         self.about.setHtml(f'''<html><body style="font-family:Manrope;color:#253b50;font-size:14px;line-height:1.6">
         <h1 style="font-family:Sora;font-size:26px;color:#192f49">Monitoramento inteligente de vagas</h1>
         <p>Projeto de Robótica e Visão Computacional da Unochapecó.<br>Docente: Wagner Titon.</p>
         <h2 style="font-family:Sora;font-size:17px">O que o aplicativo mostra</h2>
-        <p>Cinco regiões de vagas cadastradas em uma gravação. A janela sincroniza o quadro reproduzido com os estados calculados pelo detector, sem conexão com uma câmera ao vivo. As demais vagas visíveis não são monitoradas.</p>
+        <p>Mapa com 68 vagas visíveis cadastradas em uma gravação. A janela sincroniza o quadro reproduzido com os estados calculados pelo detector, sem conexão com uma câmera ao vivo. Ilhas, corredores, obstáculo central e áreas fora do enquadramento não entram na contagem.</p>
         <h2 style="font-family:Sora;font-size:17px">Como funciona</h2>
-        <p>Python, OpenCV e NumPy comparam cada região com uma referência vazia. O processamento usa tons de cinza, suavização, diferença de imagem, limiarização e confirmação em cinco quadros. A interface nativa utiliza Qt. Não há modelo treinado. O percentual de área alterada não é uma probabilidade de ocupação.</p>
+        <p>Python, OpenCV e NumPy medem a densidade de textura dentro de cada vaga usando suavização, limiarização adaptativa, filtro de mediana e dilatação. Dois limiares e cinco quadros consecutivos confirmam o estado, inclusive para carros que ficam parados durante toda a gravação. A interface nativa utiliza Qt. Não há modelo treinado. O percentual de textura não é uma probabilidade de ocupação.</p>
         <h2 style="font-family:Sora;font-size:17px">Resultados e limites</h2><p>{metrics}</p>
-        <p>A referência é o quadro 678 do vídeo, com as cinco regiões selecionadas vazias. Sombras, oclusões e movimento da câmera podem provocar erros. A coleta própria e a avaliação em gravações independentes ainda estão pendentes.</p>
+        <p>O quadro 678 fornece apenas a resolução do exemplo completo; não é uma referência vazia das 68 vagas. Regiões e limiares foram calibrados neste mesmo clipe. Veículos lisos, pedestres, sombras e oclusões podem causar erros. O experimento anterior por referência vazia continua disponível no terminal. A coleta própria e a avaliação em gravações independentes ainda estão pendentes.</p>
         <h2 style="font-family:Sora;font-size:17px">Equipe</h2>
         <p>Vitor Rodi · Pedro Toigo · Bruno Fell Antunes · Edson Leandro Soares</p>
         <h2 style="font-family:Sora;font-size:17px">Origem do vídeo</h2>

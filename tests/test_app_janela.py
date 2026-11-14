@@ -23,15 +23,19 @@ class AppWindowTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.qt=QApplication.instance() or QApplication([])
-        result=subprocess.run([sys.executable,str(ROOT/'executar_exemplo.py')],capture_output=True,text=True)
+        cls.analysis=tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.analysis.cleanup)
+        result=subprocess.run([sys.executable,str(ROOT/'executar_exemplo.py'),'--completo','--output',cls.analysis.name],capture_output=True,text=True)
         if result.returncode:raise RuntimeError(result.stderr)
+        from app.modelo import load_session
+        cls.session=load_session(ROOT,Path(cls.analysis.name))
 
     def setUp(self):
         self.assertIsNotNone(importlib.util.find_spec('app.janela'),'Janela do aplicativo ainda não implementada')
         from app.modelo import load_session
         from app.janela import MainWindow,configure_application
         configure_application(self.qt)
-        self.window=MainWindow(ROOT,session=load_session(ROOT))
+        self.window=MainWindow(ROOT,session=self.session,output=Path(self.analysis.name))
         self.window.resize(1440,900)
         self.window.show()
         self.qt.processEvents()
@@ -39,20 +43,20 @@ class AppWindowTests(unittest.TestCase):
 
     def test_counts_follow_seek_and_preserve_initial_unknowns(self):
         self.window.controller.seek(60)
-        self.assertEqual(self.window.free_value.text(),'2')
-        self.assertEqual(self.window.occupied_value.text(),'3')
+        self.assertEqual(self.window.free_value.text(),'11')
+        self.assertEqual(self.window.occupied_value.text(),'57')
         self.window.controller.seek(678)
-        self.assertEqual(self.window.free_value.text(),'5')
-        self.assertEqual(self.window.occupied_value.text(),'0')
+        self.assertEqual(self.window.free_value.text(),'14')
+        self.assertEqual(self.window.occupied_value.text(),'54')
         self.window.controller.seek(0)
-        self.assertEqual(self.window.unknown_value.text(),'5')
+        self.assertEqual(self.window.unknown_value.text(),'68')
 
     def test_filter_and_selection_highlight_the_actual_space(self):
         self.window.controller.seek(60)
         self.window.filter_combo.setCurrentIndex(1)
         self.qt.processEvents()
         visible=[name for name,row in self.window.space_rows.items() if row.isVisible()]
-        self.assertEqual(visible,['V04','V05'])
+        self.assertEqual(set(visible),{'V04','V05','V29','V41','V44','V45','V53','V55','V57','V65','V66'})
         QTest.mouseClick(self.window.space_rows['V04'],Qt.MouseButton.LeftButton)
         self.assertEqual(self.window.video.selected_space,'V04')
         self.assertIn('V04',self.window.selection_detail.text())
@@ -63,6 +67,18 @@ class AppWindowTests(unittest.TestCase):
         QTest.keyClick(self.window.nav_about,Qt.Key.Key_Space)
         self.assertEqual(self.window.stack.currentIndex(),1)
         self.assertFalse(self.window.controller.playing)
+
+    def test_all_68_spaces_are_marked_and_last_row_can_be_selected(self):
+        self.assertEqual(len(self.window.video.spaces),68)
+        self.assertEqual(set(self.window.space_rows),{f'V{i:02}' for i in range(1,69)})
+        last=self.window.space_rows['V68']
+        self.window.space_scroll.ensureWidgetVisible(last)
+        QTest.qWait(80)
+        self.assertGreater(self.window.space_scroll.verticalScrollBar().value(),0)
+        QTest.mouseClick(last,Qt.MouseButton.LeftButton)
+        self.assertEqual(self.window.video.selected_space,'V68')
+        self.assertIn('Textura detectada',self.window.selection_detail.text())
+        self.assertEqual(self.window.session.counts(60),{'livre':11,'ocupada':57,'indefinida':0})
 
     def test_play_pause_end_and_restart(self):
         self.window.controller.seek(60)
@@ -83,12 +99,12 @@ class AppWindowTests(unittest.TestCase):
 
     def test_history_rewinds_and_can_jump_to_an_event(self):
         self.window.controller.seek(400)
-        self.assertEqual(self.window.history_list.count(),3)
+        self.assertEqual(self.window.history_list.count(),5)
         self.window.controller.seek(200)
-        self.assertEqual(self.window.history_list.count(),1)
-        item=self.window.history_list.item(0)
+        self.assertEqual(self.window.history_list.count(),4)
+        item=self.window.history_list.item(3)
         self.window.jump_to_event(item)
-        self.assertEqual(self.window.controller.index,147)
+        self.assertEqual(self.window.controller.index,118)
         self.assertEqual(self.window.video.selected_space,'V01')
 
     def test_presentation_restores_normal_window_and_overlay_toggle(self):
@@ -126,7 +142,7 @@ class AppWindowTests(unittest.TestCase):
                 self.assertIsNotNone(window.session,window.status_label.text())
                 self.assertEqual(window.session.frame_count,679)
                 self.assertTrue(window.play_button.isEnabled())
-                self.assertEqual(window.free_value.text(),'2')
+                self.assertEqual(window.free_value.text(),'11')
                 self.assertEqual(window.selection_detail.text(),'Selecione uma vaga para destacá-la no vídeo.')
                 self.assertTrue((Path(tmp)/'avaliacao.json').is_file())
             finally:window.close()

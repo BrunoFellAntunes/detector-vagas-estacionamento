@@ -94,22 +94,23 @@ class VideoCanvas(QWidget):
         target=self.image_rect()
         painter.drawPixmap(target,self.pixmap,QRectF(self.pixmap.rect()))
         scale=target.width()/self.source_width
+        compact=len(self.spaces)>12
         for space,result in zip(self.spaces,self.results) if self.show_overlays else []:
             selected=space['id']==self.selected_space
             points=QPolygonF([QPointF(target.x()+x*scale,target.y()+y*scale) for x,y in space['points']])
             color=QColor(COLORS[result['state']])
-            fill=QColor(color);fill.setAlpha(46 if not selected else 88)
+            fill=QColor(color);fill.setAlpha((24 if compact else 46) if not selected else 88)
             painter.setBrush(fill)
             painter.setPen(QPen(QColor('#ffffff') if selected else color,3 if selected else 2))
             painter.drawPolygon(points)
-            font=QFont('Manrope');font.setPixelSize(12);font.setWeight(QFont.Weight.Bold)
+            font=QFont('Manrope');font.setPixelSize(10 if compact and not selected else 12);font.setWeight(QFont.Weight.Bold)
             painter.setFont(font)
-            text=f"{space['id']} · {LABELS[result['state']]}"
+            text=space['id'] if compact and not selected else f"{space['id']} · {LABELS[result['state']]}"
             metrics=painter.fontMetrics()
             width=metrics.horizontalAdvance(text)+14
             x=max(target.left()+3,min(points.boundingRect().left(),target.right()-width-3))
-            y=max(target.top()+3,points.boundingRect().top()-25)
-            label=QRectF(x,y,width,21)
+            y=points.boundingRect().top()+2 if compact and not selected else max(target.top()+3,points.boundingRect().top()-25)
+            label=QRectF(x,y,width,16 if compact and not selected else 21)
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QColor('#152a3b'))
             painter.drawRoundedRect(label,4,4)
