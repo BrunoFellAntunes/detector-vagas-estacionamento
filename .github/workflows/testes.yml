@@ -30,3 +30,5 @@ jobs:
         run: python detector.py --source dados/video_simulado.mp4 --reference dados/referencia_vazia.png --config dados/vagas_demo.json --output resultados/video
       - name: Conferir saída contra o gabarito
         run: python verificar_demo.py
+      - name: Executar e avaliar cinco vagas no vídeo real
+        run: python executar_exemplo.py
