@@ -93,7 +93,7 @@ def load_session(root,output=None):
             if (not 0<=index<count or name not in ids or state not in STATES or
                     not math.isfinite(ratio) or not 0<=ratio<=1 or name in frames[index]):
                 raise ValueError('Registro de ocupação inválido, duplicado ou fora da gravação.')
-            frames[index][name]={'id':name,'state':state,'ratio':ratio}
+            frames[index][name]={'id':name,'state':state,'ratio':ratio,'reason':row.get('motivo','')}
     if any(set(frame)!=set(ids) for frame in frames):
         raise ValueError('Existem quadros sem todas as vagas. Reprocesse o vídeo.')
     snapshots=[[frame[name] for name in ids] for frame in frames]

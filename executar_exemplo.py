@@ -11,7 +11,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--output',type=Path,default=root/'resultados/carpark')
     p.add_argument('--show',action='store_true',help='Abrir janela; espaço pausa, Q ou Esc encerra.')
-    p.add_argument('--completo',action='store_true',help='Analisar as 68 vagas por textura, sem referência vazia global.')
+    p.add_argument('--completo',action='store_true',help='Analisar o mapa completo por textura, sem referência vazia global.')
     args=p.parse_args()
     data=root/'dados/terceiros'
     config_name='vagas_completas_carpark.json' if args.completo else 'vagas_carpark.json'

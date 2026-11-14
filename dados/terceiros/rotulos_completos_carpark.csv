@@ -72,6 +72,9 @@ quadro,vaga,estado
 60,V66,livre
 60,V67,ocupada
 60,V68,ocupada
+60,V69,livre
+60,V70,ocupada
+60,V71,ocupada
 120,V01,ocupada
 120,V02,ocupada
 120,V03,ocupada
@@ -190,3 +193,6 @@ quadro,vaga,estado
 678,V66,livre
 678,V67,ocupada
 678,V68,ocupada
+678,V69,livre
+678,V70,ocupada
+678,V71,ocupada

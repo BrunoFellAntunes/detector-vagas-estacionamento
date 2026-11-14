@@ -43,20 +43,20 @@ class AppWindowTests(unittest.TestCase):
 
     def test_counts_follow_seek_and_preserve_initial_unknowns(self):
         self.window.controller.seek(60)
-        self.assertEqual(self.window.free_value.text(),'11')
+        self.assertEqual(self.window.free_value.text(),'12')
         self.assertEqual(self.window.occupied_value.text(),'57')
         self.window.controller.seek(678)
-        self.assertEqual(self.window.free_value.text(),'14')
+        self.assertEqual(self.window.free_value.text(),'15')
         self.assertEqual(self.window.occupied_value.text(),'54')
         self.window.controller.seek(0)
-        self.assertEqual(self.window.unknown_value.text(),'68')
+        self.assertEqual(self.window.unknown_value.text(),'71')
 
     def test_filter_and_selection_highlight_the_actual_space(self):
         self.window.controller.seek(60)
         self.window.filter_combo.setCurrentIndex(1)
         self.qt.processEvents()
         visible=[name for name,row in self.window.space_rows.items() if row.isVisible()]
-        self.assertEqual(set(visible),{'V04','V05','V29','V41','V44','V45','V53','V55','V57','V65','V66'})
+        self.assertEqual(set(visible),{'V04','V05','V29','V41','V44','V45','V53','V55','V57','V65','V66','V69'})
         QTest.mouseClick(self.window.space_rows['V04'],Qt.MouseButton.LeftButton)
         self.assertEqual(self.window.video.selected_space,'V04')
         self.assertIn('V04',self.window.selection_detail.text())
@@ -68,17 +68,28 @@ class AppWindowTests(unittest.TestCase):
         self.assertEqual(self.window.stack.currentIndex(),1)
         self.assertFalse(self.window.controller.playing)
 
-    def test_all_68_spaces_are_marked_and_last_row_can_be_selected(self):
-        self.assertEqual(len(self.window.video.spaces),68)
-        self.assertEqual(set(self.window.space_rows),{f'V{i:02}' for i in range(1,69)})
-        last=self.window.space_rows['V68']
+    def test_all_71_regions_are_marked_and_last_row_can_be_selected(self):
+        self.assertEqual(len(self.window.video.spaces),71)
+        self.assertEqual(set(self.window.space_rows),{f'V{i:02}' for i in range(1,72)})
+        last=self.window.space_rows['V71']
         self.window.space_scroll.ensureWidgetVisible(last)
         QTest.qWait(80)
         self.assertGreater(self.window.space_scroll.verticalScrollBar().value(),0)
         QTest.mouseClick(last,Qt.MouseButton.LeftButton)
-        self.assertEqual(self.window.video.selected_space,'V68')
+        self.assertEqual(self.window.video.selected_space,'V71')
         self.assertIn('Textura detectada',self.window.selection_detail.text())
-        self.assertEqual(self.window.session.counts(60),{'livre':11,'ocupada':57,'indefinida':0})
+        self.assertIn('duas vagas',self.window.selection_detail.text())
+        self.assertEqual(self.window.session.counts(60),{'livre':12,'ocupada':57,'indefinida':2})
+
+    def test_van_pair_remains_under_review_and_upper_right_space_is_present(self):
+        regions={s['id']:s for s in self.window.session.spaces}
+        self.assertLess(max(p[1] for p in regions['V69']['points']),min(p[1] for p in regions['V59']['points']))
+        for frame in [60,678]:
+            snapshot={s['id']:s for s in self.window.session.snapshot(frame)}
+            self.assertEqual(snapshot['V69']['state'],'livre')
+            for name in ['V70','V71']:
+                self.assertEqual(snapshot[name]['state'],'indefinida')
+                self.assertIn('duas vagas',snapshot[name]['reason'])
 
     def test_play_pause_end_and_restart(self):
         self.window.controller.seek(60)
@@ -144,7 +155,7 @@ class AppWindowTests(unittest.TestCase):
                 self.assertIsNotNone(window.session,window.status_label.text())
                 self.assertEqual(window.session.frame_count,679)
                 self.assertTrue(window.play_button.isEnabled())
-                self.assertEqual(window.free_value.text(),'11')
+                self.assertEqual(window.free_value.text(),'12')
                 self.assertEqual(window.selection_detail.text(),'Selecione uma vaga para destacá-la no vídeo.')
                 self.assertTrue((Path(tmp)/'avaliacao.json').is_file())
             finally:window.close()

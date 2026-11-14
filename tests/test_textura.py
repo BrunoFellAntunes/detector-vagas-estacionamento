@@ -70,5 +70,40 @@ class TextureTests(unittest.TestCase):
             self.assertEqual(row['estado'],'ocupada')
             self.assertEqual(json.loads((folder/'out/resumo.json').read_text(encoding='utf-8'))['metodo'],'texture')
 
+    def test_object_crossing_two_spaces_keeps_both_under_review(self):
+        config=dict(self.config,spaces=[
+            {'id':'V01','points':[[10,10],[95,10],[95,110],[10,110]]},
+            {'id':'V02','points':[[105,10],[190,10],[190,110],[105,110]]}],
+            ambiguous_groups=[{'spaces':['V01','V02'],'brightness_threshold':180,
+                'min_region_ratio':.08,'reason':'Ocupação atravessando duas vagas'}])
+        crossing=self.empty.copy();cv2.rectangle(crossing,(35,35),(165,85),(240,240,240),-1)
+        detector=Detector(self.empty,config)
+        for _ in range(8):results=detector.process(crossing)
+        self.assertEqual([r['state'] for r in results],['indefinida','indefinida'])
+        self.assertTrue(all(r.get('reason')=='Ocupação atravessando duas vagas' for r in results))
+        # Remover o objeto elimina o motivo, mas exige novamente confirmação temporal.
+        self.assertEqual([r['state'] for r in detector.process(self.empty)],['indefinida','indefinida'])
+        results=detector.process(self.empty)
+        self.assertEqual([r['state'] for r in results],['livre','livre'])
+        self.assertTrue(all(not r.get('reason') for r in results))
+
+    def test_separate_objects_do_not_trigger_cross_space_review(self):
+        config=dict(self.config,spaces=[
+            {'id':'V01','points':[[10,10],[95,10],[95,110],[10,110]]},
+            {'id':'V02','points':[[105,10],[190,10],[190,110],[105,110]]}],
+            ambiguous_groups=[{'spaces':['V01','V02'],'brightness_threshold':180,'min_region_ratio':.08}])
+        separate=self.empty.copy()
+        cv2.rectangle(separate,(25,30),(80,90),(240,240,240),-1)
+        cv2.rectangle(separate,(120,30),(175,90),(240,240,240),-1)
+        results=Detector(self.empty,config).process(separate,instant=True)
+        self.assertTrue(all(not r.get('reason') for r in results))
+        self.assertTrue(all(r['state']!='indefinida' for r in results))
+
+    def test_invalid_ambiguity_groups_are_rejected(self):
+        for group in [{'spaces':['V01','V99']},{'spaces':['V01','V01']},
+                      {'spaces':['V01'],'min_region_ratio':0}]:
+            with self.subTest(group=group),self.assertRaises(ValueError):
+                Detector(self.empty,dict(self.config,ambiguous_groups=[group]))
+
 
 if __name__=='__main__':unittest.main()

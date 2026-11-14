@@ -349,7 +349,9 @@ class MainWindow(QMainWindow):
         if not name or not self.controller:return
         result=next(r for r in self.session.snapshot(self.controller.index) if r['id']==name)
         measure='Textura detectada' if self.session.method=='texture' else 'Área alterada'
-        self.selection_detail.setText(f"{name} · {LABELS[result['state']]}\n{measure}: {result['ratio']:.0%}")
+        detail=f"{name} · {LABELS[result['state']]}\n{measure}: {result['ratio']:.0%}"
+        if result.get('reason'):detail+='\n'+result['reason']
+        self.selection_detail.setText(detail)
 
     def jump_to_event(self,item):
         if not self.controller:return
@@ -457,11 +459,11 @@ class MainWindow(QMainWindow):
         <h1 style="font-family:Sora;font-size:26px;color:#192f49">Monitoramento inteligente de vagas</h1>
         <p>Projeto de Robótica e Visão Computacional da Unochapecó.<br>Docente: Wagner Titon.</p>
         <h2 style="font-family:Sora;font-size:17px">O que o aplicativo mostra</h2>
-        <p>Mapa com 68 vagas visíveis cadastradas em uma gravação. A janela sincroniza o quadro reproduzido com os estados calculados pelo detector, sem conexão com uma câmera ao vivo. Ilhas, corredores, obstáculo central e áreas fora do enquadramento não entram na contagem.</p>
+        <p>Mapa com 71 regiões cadastradas: 69 vagas e duas áreas centrais de ocupação ambígua. A janela sincroniza o quadro reproduzido com os estados calculados pelo detector, sem conexão com uma câmera ao vivo. A região acima da V59 está incluída como V69. A van central abrange V70 e V71: quando um mesmo objeto claro atravessa ambas, elas ficam em análise. Ilhas, corredores e áreas fora do enquadramento não entram na contagem.</p>
         <h2 style="font-family:Sora;font-size:17px">Como funciona</h2>
         <p>Python, OpenCV e NumPy medem a densidade de textura dentro de cada vaga usando suavização, limiarização adaptativa, filtro de mediana e dilatação. Dois limiares e cinco quadros consecutivos confirmam o estado, inclusive para carros que ficam parados durante toda a gravação. A interface nativa utiliza Qt. Não há modelo treinado. O percentual de textura não é uma probabilidade de ocupação.</p>
         <h2 style="font-family:Sora;font-size:17px">Resultados e limites</h2><p>{metrics}</p>
-        <p>O quadro 678 fornece apenas a resolução do exemplo completo; não é uma referência vazia das 68 vagas. Regiões e limiares foram calibrados neste mesmo clipe. Veículos lisos, pedestres, sombras e oclusões podem causar erros. O experimento anterior por referência vazia continua disponível no terminal. A coleta própria e a avaliação em gravações independentes ainda estão pendentes.</p>
+        <p>O quadro 678 fornece apenas a resolução do exemplo completo; não é uma referência vazia do mapa completo. Regiões e limiares foram calibrados neste mesmo clipe. Veículos lisos, pedestres, sombras e oclusões podem causar erros. O experimento anterior por referência vazia continua disponível no terminal. A coleta própria e a avaliação em gravações independentes ainda estão pendentes.</p>
         <h2 style="font-family:Sora;font-size:17px">Equipe</h2>
         <p>Vitor Rodi · Pedro Toigo · Bruno Fell Antunes · Edson Leandro Soares</p>
         <h2 style="font-family:Sora;font-size:17px">Origem do vídeo</h2>

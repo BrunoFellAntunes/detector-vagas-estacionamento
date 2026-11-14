@@ -1569,6 +1569,75 @@
       ],
       "setor": "F",
       "linha": 12
+    },
+    {
+      "id": "V69",
+      "points": [
+        [
+          902,
+          147
+        ],
+        [
+          994,
+          147
+        ],
+        [
+          994,
+          177
+        ],
+        [
+          902,
+          177
+        ]
+      ],
+      "setor": "F",
+      "linha": 2
+    },
+    {
+      "id": "V70",
+      "points": [
+        [
+          401,
+          479
+        ],
+        [
+          500,
+          479
+        ],
+        [
+          500,
+          519
+        ],
+        [
+          401,
+          519
+        ]
+      ],
+      "setor": "C",
+      "linha": 9
+    },
+    {
+      "id": "V71",
+      "points": [
+        [
+          514,
+          479
+        ],
+        [
+          611,
+          479
+        ],
+        [
+          611,
+          519
+        ],
+        [
+          514,
+          519
+        ]
+      ],
+      "setor": "D",
+      "linha": 9
     }
   ],
   "method": "texture",
@@ -1580,5 +1649,16 @@
   "texture_constant": 16,
   "analysis_inset": 3,
   "source_video": "carPark.mp4",
-  "note": "68 vagas visiveis cadastradas. Ilhas, corredores e obstaculo central excluidos. Textura da imagem sem referencia vazia global; limiares calibrados neste clipe, sem validacao independente."
+  "note": "71 regioes: 69 vagas e duas areas centrais de ocupacao ambigua. Ilha superior do setor F e corredores excluidos. V70/V71 permanecem em analise quando um componente claro atravessa ambas. Limiares calibrados neste clipe, sem validacao independente.",
+  "ambiguous_groups": [
+    {
+      "spaces": [
+        "V70",
+        "V71"
+      ],
+      "brightness_threshold": 180,
+      "min_region_ratio": 0.08,
+      "reason": "Possível ocupação de duas vagas pelo mesmo veículo"
+    }
+  ]
 }

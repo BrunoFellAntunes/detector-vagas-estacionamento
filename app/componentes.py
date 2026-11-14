@@ -110,6 +110,8 @@ class VideoCanvas(QWidget):
             width=metrics.horizontalAdvance(text)+14
             x=max(target.left()+3,min(points.boundingRect().left(),target.right()-width-3))
             y=points.boundingRect().top()+2 if compact and not selected else max(target.top()+3,points.boundingRect().top()-25)
+            if compact and not selected and points.boundingRect().height()<20:
+                y=max(target.top()+3,points.boundingRect().top()-18)
             label=QRectF(x,y,width,16 if compact and not selected else 21)
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QColor('#152a3b'))

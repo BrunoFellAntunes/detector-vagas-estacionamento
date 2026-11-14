@@ -87,10 +87,44 @@ class Detector:
                                 'state': 'indefinida', 'candidate': None, 'count': 0})
             ids.add(name)
         self.reference = self._gray(reference)
+        self.ambiguity_groups=[]
+        by_id={s['id']:s for s in self.spaces}
+        for group in config.get('ambiguous_groups',[]):
+            members=group.get('spaces',[])
+            brightness=float(group.get('brightness_threshold',180))
+            minimum=float(group.get('min_region_ratio',.08))
+            if (len(members)<2 or len(set(members))!=len(members) or
+                    any(name not in by_id for name in members) or
+                    not 0<brightness<255 or not 0<minimum<=1):
+                raise ValueError('Grupo de ambiguidade ou parâmetros inválidos.')
+            regions=[by_id[name] for name in members]
+            x=min(s['bounds'][0] for s in regions);y=min(s['bounds'][1] for s in regions)
+            right=max(s['bounds'][0]+s['bounds'][2] for s in regions)
+            bottom=max(s['bounds'][1]+s['bounds'][3] for s in regions)
+            self.ambiguity_groups.append({'spaces':regions,'bounds':(x,y,right-x,bottom-y),
+                'brightness':brightness,'minimum':minimum,
+                'reason':str(group.get('reason','Possível ocupação de duas vagas'))})
 
     @staticmethod
     def _gray(frame):
         return cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (5, 5), 0)
+
+    def _ambiguous_spaces(self,gray):
+        uncertain={}
+        for group in self.ambiguity_groups:
+            x,y,w,h=group['bounds']
+            bright=(gray[y:y+h,x:x+w]>=group['brightness']).astype(np.uint8)
+            count,labels,stats,_=cv2.connectedComponentsWithStats(bright,connectivity=8)
+            for component in range(1,count):
+                overlaps=[]
+                for space in group['spaces']:
+                    sx,sy,sw,sh=space['bounds']
+                    local=labels[sy-y:sy-y+sh,sx-x:sx-x+sw]
+                    overlaps.append(float((local[space['mask']]==component).mean()))
+                if all(value>=group['minimum'] for value in overlaps):
+                    uncertain.update((space['id'],group['reason']) for space in group['spaces'])
+                    break
+        return uncertain
 
     def process(self, frame, instant=False):
         if frame.shape != self.shape:
@@ -105,13 +139,20 @@ class Detector:
             diff = cv2.absdiff(self.reference, self._gray(frame))
             changed = (diff > self.pixel_threshold).astype(np.uint8)
             changed = cv2.morphologyEx(changed, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+        uncertain={}
+        if self.ambiguity_groups:
+            if self.method!='texture':gray=cv2.GaussianBlur(cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY),(3,3),0)
+            uncertain=self._ambiguous_spaces(gray)
         results = []
         for space in self.spaces:
             x,y,w,h=space['bounds']
             ratio = float(changed[y:y+h,x:x+w][space['mask']].mean())
             target = ('ocupada' if ratio >= space['occupied_ratio'] else
                       'livre' if ratio <= space['free_ratio'] else None)
-            if instant:
+            if space['id'] in uncertain:
+                space['state']='indefinida'
+                space['candidate'],space['count']=None,0
+            elif instant:
                 space['state'] = target or 'indefinida'
             elif target is None or target == space['state']:
                 space['candidate'], space['count'] = None, 0
@@ -121,7 +162,8 @@ class Detector:
                 if space['count'] >= self.stable_frames:
                     space['state'] = target
                     space['candidate'], space['count'] = None, 0
-            results.append({'id': space['id'], 'state': space['state'], 'ratio': ratio})
+            results.append({'id': space['id'], 'state': space['state'], 'ratio': ratio,
+                            'reason':uncertain.get(space['id'],'')})
         return results
 
     def annotate(self, frame, results):
@@ -188,7 +230,7 @@ def run(args):
               (output / 'eventos.csv').open('w', encoding='utf-8', newline='') as event_stream):
             log = csv.writer(stream)
             measure='densidade_textura' if detector.method=='texture' else 'fracao_alterada'
-            log.writerow(['quadro', 'tempo_video_s', 'vaga', 'estado', measure])
+            log.writerow(['quadro', 'tempo_video_s', 'vaga', 'estado', measure, 'motivo'])
             events = csv.writer(event_stream)
             events.writerow(['quadro', 'tempo_video_s', 'vaga', 'estado_anterior', 'estado_atual'])
             while frame is not None:
@@ -202,7 +244,7 @@ def run(args):
                                 (10, annotated.shape[0]-8), cv2.FONT_HERSHEY_SIMPLEX, .45, (255,255,255), 1)
                 for result in results:
                     log.writerow([frame_number, round(frame_number / fps, 3), result['id'],
-                                  result['state'], round(result['ratio'], 5)])
+                                  result['state'], round(result['ratio'], 5), result['reason']])
                     before = previous_states[result['id']]
                     if before != result['state']:
                         events.writerow([frame_number, round(frame_number/fps, 3), result['id'],
