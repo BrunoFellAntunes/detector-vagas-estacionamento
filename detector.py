@@ -1,4 +1,4 @@
-"""Protótipo acadêmico: ocupação por diferença contra referência vazia fixa.
+"""Protótipo acadêmico: ocupação por referência vazia ou textura da região.
 
 Não detecta semanticamente automóveis. Sombras e objetos também alteram a vaga.
 """
@@ -37,6 +37,16 @@ class Detector:
         self.occupied_ratio = float(config.get('occupied_ratio', .2))
         self.free_ratio = float(config.get('free_ratio', .1))
         self.stable_frames = config.get('stable_frames', 5)
+        self.method = config.get('method', 'reference')
+        self.texture_block_size = config.get('texture_block_size', 25)
+        self.texture_constant = float(config.get('texture_constant', 16))
+        self.analysis_inset = config.get('analysis_inset', 0)
+        if self.method not in ('reference', 'texture'):
+            raise ValueError('Método deve ser reference ou texture.')
+        if (not isinstance(self.texture_block_size,int) or self.texture_block_size<3 or
+                self.texture_block_size%2==0 or not np.isfinite(self.texture_constant) or
+                not isinstance(self.analysis_inset,int) or not 0<=self.analysis_inset<=20):
+            raise ValueError('Parâmetros de textura ou margem de análise inválidos.')
         if not 0 <= self.free_ratio < self.occupied_ratio <= 1:
             raise ValueError('Exige 0 <= free_ratio < occupied_ratio <= 1.')
         if not 0 < self.pixel_threshold < 255:
@@ -61,9 +71,19 @@ class Detector:
                     np.any(points[:, 1] >= h) or not cv2.isContourConvex(points) or
                     cv2.contourArea(points) < 4):
                 raise ValueError('Use um polígono convexo dentro da imagem.')
-            mask = np.zeros((h, w), np.uint8)
-            cv2.fillPoly(mask, [points], 255)
-            self.spaces.append({'id': name, 'points': points, 'mask': mask > 0,
+            local_free=float(space.get('free_ratio',self.free_ratio))
+            local_occupied=float(space.get('occupied_ratio',self.occupied_ratio))
+            if not 0<=local_free<local_occupied<=1:
+                raise ValueError('Limiares da vaga exigem 0 <= livre < ocupada <= 1.')
+            x,y,rw,rh=cv2.boundingRect(points)
+            mask = np.zeros((rh,rw), np.uint8)
+            cv2.fillPoly(mask, [points-[x,y]], 255)
+            if self.analysis_inset:
+                size=2*self.analysis_inset+1
+                mask=cv2.erode(mask,np.ones((size,size),np.uint8),borderType=cv2.BORDER_CONSTANT,borderValue=0)
+            if not mask.any():raise ValueError('Margem de análise removeu toda a vaga.')
+            self.spaces.append({'id': name, 'points': points, 'mask': mask > 0,'bounds':(x,y,rw,rh),
+                                'free_ratio':local_free,'occupied_ratio':local_occupied,
                                 'state': 'indefinida', 'candidate': None, 'count': 0})
             ids.add(name)
         self.reference = self._gray(reference)
@@ -75,14 +95,22 @@ class Detector:
     def process(self, frame, instant=False):
         if frame.shape != self.shape:
             raise ValueError('Imagem alterou a resolução. Refaça a calibração.')
-        diff = cv2.absdiff(self.reference, self._gray(frame))
-        changed = (diff > self.pixel_threshold).astype(np.uint8)
-        changed = cv2.morphologyEx(changed, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+        if self.method=='texture':
+            gray=cv2.GaussianBlur(cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY),(3,3),0)
+            binary=cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv2.THRESH_BINARY_INV,self.texture_block_size,self.texture_constant)
+            binary=cv2.medianBlur(binary,5)
+            changed=(cv2.dilate(binary,np.ones((3,3),np.uint8))>0).astype(np.uint8)
+        else:
+            diff = cv2.absdiff(self.reference, self._gray(frame))
+            changed = (diff > self.pixel_threshold).astype(np.uint8)
+            changed = cv2.morphologyEx(changed, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
         results = []
         for space in self.spaces:
-            ratio = float(changed[space['mask']].mean())
-            target = ('ocupada' if ratio >= self.occupied_ratio else
-                      'livre' if ratio <= self.free_ratio else None)
+            x,y,w,h=space['bounds']
+            ratio = float(changed[y:y+h,x:x+w][space['mask']].mean())
+            target = ('ocupada' if ratio >= space['occupied_ratio'] else
+                      'livre' if ratio <= space['free_ratio'] else None)
             if instant:
                 space['state'] = target or 'indefinida'
             elif target is None or target == space['state']:
@@ -103,8 +131,8 @@ class Detector:
             pts = space['points']
             cv2.polylines(out, [pts], True, colors[result['state']], 3)
             x, y = pts.min(axis=0)
-            label = f"{space['id']} {result['state']} {result['ratio']:.0%}"
-            text_y = max(60, int(y) - 8)
+            label = space['id'] if len(self.spaces)>12 else f"{space['id']} {result['state']} {result['ratio']:.0%}"
+            text_y = int(y)+16 if len(self.spaces)>12 else max(60, int(y) - 8)
             (label_w, label_h), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, .48, 1)
             text_x = max(0, min(int(x), out.shape[1] - label_w - 5))
             cv2.rectangle(out, (text_x, text_y-label_h-5),
@@ -159,7 +187,8 @@ def run(args):
         with ((output / 'ocupacao.csv').open('w', encoding='utf-8', newline='') as stream,
               (output / 'eventos.csv').open('w', encoding='utf-8', newline='') as event_stream):
             log = csv.writer(stream)
-            log.writerow(['quadro', 'tempo_video_s', 'vaga', 'estado', 'fracao_alterada'])
+            measure='densidade_textura' if detector.method=='texture' else 'fracao_alterada'
+            log.writerow(['quadro', 'tempo_video_s', 'vaga', 'estado', measure])
             events = csv.writer(event_stream)
             events.writerow(['quadro', 'tempo_video_s', 'vaga', 'estado_anterior', 'estado_atual'])
             while frame is not None:
@@ -210,6 +239,7 @@ def run(args):
         write_image(output / 'ultimo_quadro.png', annotated)
         elapsed = time.perf_counter() - started
         summary = {
+            'metodo': detector.method,
             'tipo_fonte': 'imagem' if image_mode else 'camera' if args.source.isdigit() else 'video',
             'quadros_processados': frame_number,
             'vagas_monitoradas': len(detector.spaces),
