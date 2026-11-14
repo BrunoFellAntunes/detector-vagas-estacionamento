@@ -27,7 +27,7 @@ As imagens, o vídeo e o gabarito em `dados/` são gerados por `demo.py`. A imag
 
 ## Interface e tipografia
 
-`assets/aplicativo.png` é uma captura da janela real implementada neste repositório, em 1440 × 900, mostrando o quadro 60 da filmagem externa. Os polígonos e estados vêm dos resultados do detector. A captura não é uma montagem nem uma comprovação de desempenho em outras gravações. As três imagens em `assets/` também carregam um registro de origem em seus metadados PNG.
+`assets/aplicativo.png` é uma captura da janela real implementada neste repositório, em 1440 × 900, mostrando o quadro 60 da filmagem externa. Os polígonos e estados vêm dos resultados do detector. `assets/editor-vagas.png` mostra o editor integrado ao painel principal, com uma cópia do mesmo mapa nesse quadro. O azul identifica o cadastro, sem afirmar um estado de ocupação. As capturas não são montagens nem comprovação de desempenho em outras gravações. As imagens em `assets/` também carregam um registro de origem em seus metadados PNG.
 
 As fontes locais [Sora](https://github.com/google/fonts/tree/main/ofl/sora) e [Manrope](https://github.com/google/fonts/tree/main/ofl/manrope) foram obtidas do repositório oficial Google Fonts. São redistribuídas sob a SIL Open Font License, com os textos de licença em `app/fonts/Sora-OFL.txt` e `app/fonts/Manrope-OFL.txt`. Os arquivos TTF são carregados localmente pela interface; não há busca de fontes durante o uso.
 

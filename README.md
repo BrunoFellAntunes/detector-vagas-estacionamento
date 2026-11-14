@@ -32,7 +32,9 @@ Para abrir uma análise completa já salva, use:
 
 A janela oferece contadores sincronizados, filtros, seleção de vagas pelo vídeo ou pela lista com rolagem, histórico, busca, velocidade, tela cheia e exportação ZIP. As marcações usam verde para livre, vermelho para ocupada e amarelo para em análise. No mapa completo, as etiquetas ficam compactas; a vaga selecionada mostra seu estado por extenso.
 
-**Apresentar** ou F11 abre a tela cheia. Esc sai da tela cheia; na janela normal, pausa a reprodução. O filtro altera somente a lista: os contadores continuam incluindo as 71 regiões. Veja [o guia do aplicativo](docs/APLICATIVO.md).
+Para usar outra gravação, abra **Vídeos e vagas → Adicionar vídeo**, desenhe as vagas com o mouse e clique em **Salvar e analisar**. O editor ocupa o próprio painel principal. Retângulos, quatro pontos, movimento dos cantos, exclusão, desfazer e perfis salvos permitem preparar outro estacionamento sem editar código. O cadastro é manual e exige câmera fixa e conferência da detecção. Veja [o guia do editor](docs/EDITOR_DE_VAGAS.md).
+
+**Apresentar** ou F11 abre a tela cheia. Esc sai da tela cheia; no monitoramento normal, pausa a reprodução; no editor, cancela o gesto atual. O filtro altera somente a lista: os contadores continuam incluindo as 71 regiões na demonstração. Veja [o guia do aplicativo](docs/APLICATIVO.md).
 
 ## Tecnologias e funcionamento
 
@@ -97,13 +99,15 @@ Os resultados antigos são invalidados ao iniciar uma nova execução. Vídeo in
 .\.venv\Scripts\python.exe verificar_demo.py
 ```
 
-A suíte completa tem 47 testes. Instale `requirements-app.txt` para incluir os testes reais de widgets Qt; com somente `requirements.txt`, os testes de Qt são omitidos. A suíte cobre textura, referência, confirmação temporal, avaliação, exportação, reprodução, erros, cancelamento e seleção da última região pela rolagem e ambiguidade entre duas regiões. GitHub Actions executa em Windows e Linux e repete os vídeos simulado, completo e anterior.
+A suíte completa tem 60 testes. Instale `requirements-app.txt` para incluir os testes reais de widgets Qt; com somente `requirements.txt`, os testes de Qt são omitidos. A suíte cobre textura, referência, confirmação temporal, avaliação, exportação, reprodução, erros, cancelamento, rolagem, ambiguidade, importação de vídeos, revisões de perfis e edição pelo mouse no painel. GitHub Actions executa em Windows e Linux e repete os vídeos simulado, completo e anterior.
 
 A simulação tem 240 quadros e seis vagas: 1.408 de 1.440 decisões concordantes, 24 indefinidas na inicialização e oito divergentes durante a confirmação temporal. A concordância de 97,78% descreve somente essa simulação.
 
 ## Gravar e cadastrar outro estacionamento
 
-Siga [COLETA_REAL.md](docs/COLETA_REAL.md) e mantenha câmera, foco, resolução e posição fixos. O mapa incluído serve somente a esta filmagem. O modo por referência exige um quadro com todas as vagas cadastradas vazias; a extração requer confirmação humana:
+Siga [COLETA_REAL.md](docs/COLETA_REAL.md) e mantenha câmera, foco, resolução e posição fixos. Para cadastrar pelo aplicativo, use [Vídeos e vagas](docs/EDITOR_DE_VAGAS.md). Os perfis locais ficam em `perfis/`, ignorada pelo Git, e cada vídeo recebe seu próprio mapa. O mapa incluído serve somente à filmagem de demonstração.
+
+O modo anterior por referência vazia continua disponível pelo terminal e exige um quadro com todas as vagas cadastradas vazias; a extração requer confirmação humana:
 
 ```powershell
 .\.venv\Scripts\python.exe extrair_referencia.py --video dados/reais/video_real.mp4 --quadro 0 --output dados/reais/referencia.png --confirmar-vagas-vazias

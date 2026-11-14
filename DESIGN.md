@@ -251,7 +251,7 @@ O hover do primário escurece o azul; secundários clareiam o fundo; o estado pr
 
 ### Inputs / Fields
 
-A superfície usa seletores nativos de velocidade e filtro, sem campo de texto livre. Ambos têm fundo claro, borda reservada de 2px, seta vetorial e canto `field`. O foco altera a cor da borda sem mudar o tamanho. A velocidade ocupa 74px; o filtro acompanha a largura do painel.
+A superfície usa seletores nativos de velocidade e filtro. Ambos têm fundo claro, borda reservada de 2px, seta vetorial e canto `field`. O foco altera a cor da borda sem mudar o tamanho. A velocidade ocupa 74px; o filtro acompanha a largura do painel. O editor acrescenta nome do estacionamento, seletor de perfil e campos numéricos de limiar com a mesma linguagem de borda e foco.
 
 O controle temporal usa trilha de 5px, progresso azul e alça de 13px com borda branca de 2px. O foco também contorna a área do controle. Tempo atual e duração aparecem ao lado.
 
@@ -272,6 +272,12 @@ Cada linha é um botão com identificador à esquerda e etiqueta de estado à di
 As regiões cadastradas recebem a cor de estado e uma etiqueta escura com identificador e estado. A seleção reforça contorno e preenchimento. Com até 12 regiões, as etiquetas têm altura de 21px e largura ajustada ao texto. No mapa completo de 71 regiões, etiquetas de 16px com fonte Manrope de 10px mostram só o identificador dentro de cada retângulo; em retângulos com altura de tela inferior a 20px, a etiqueta fica logo acima para não invadir a região seguinte; a vaga selecionada mostra o estado por extenso com 12px/21px. O preenchimento não selecionado usa alfa 24 para preservar a imagem. A imagem permanece dominante; marcações podem ser ocultadas pelo controle “Marcações”, cujo estado ativo recebe fundo e borda azuis discretos.
 
 Estados de preparação e falha ocupam a própria área escura do vídeo, com título claro e explicação secundária. Durante o processamento, contadores mostram um travessão e os controles dependentes ficam desabilitados.
+
+### Editor no painel principal
+
+Vídeos e vagas substitui o conteúdo de monitoramento dentro do mesmo QStackedWidget. A navegação permanece disponível; contadores e ações de reprodução ficam ocultos nessa página. A faixa superior combina seletor de perfil e Adicionar vídeo. A imagem ocupa a área principal e mantém a proporção, com ferramentas de retângulo, quatro pontos e ajuste acima. Os comandos desfazer/refazer usam ícones com nome acessível e dica de atalho.
+
+O painel lateral de 264px reúne nome, lista, exclusão, conferência e ajustes de detecção recolhidos por padrão. Há rolagem para manter esses controles acessíveis em 1060 × 700. As marcações ficam azuis durante a edição; a seleção tem cantos circulares brancos. A conferência pontual usa as cores de estado existentes. Voltar e Salvar e analisar ficam no rodapé do editor; nenhuma janela separada de edição é criada.
 
 ## Do's and Don'ts
 

@@ -1,6 +1,6 @@
 # Aplicativo Vaga
 
-A interface nativa usa o detector e os arquivos de análise deste repositório. Ela reproduz uma gravação e sincroniza cada imagem com os estados calculados para 71 regiões. A janela apresenta a gravação incluída; ilhas e corredores ficam fora do mapa; as duas áreas da van central são monitoradas para análise conjunta.
+A interface nativa usa o detector e os arquivos de análise deste repositório. Na demonstração incluída, sincroniza cada imagem com os estados calculados para 71 regiões; ilhas e corredores ficam fora do mapa; as duas áreas da van central são monitoradas para análise conjunta. Também permite importar vídeos locais e cadastrar seus mapas no próprio painel, em **Vídeos e vagas**.
 
 ## Instalação e abertura
 
@@ -38,10 +38,12 @@ Para reutilizar resultados completos de uma execução anterior:
 | Últimas alterações | Clique em uma mudança para voltar ao quadro em que foi confirmada |
 | Reprocessar | Executa novamente o detector e substitui a análise anterior |
 | Apresentar / F11 | Entra ou sai da tela cheia, ocultando a barra lateral e o rodapé |
-| Esc | Sai da tela cheia; na janela normal, pausa a reprodução |
+| Esc | Sai da tela cheia; no monitoramento normal, pausa; no editor, cancela o gesto atual |
 | Tab / Shift+Tab | Percorre os controles, com foco visível |
 | Espaço | Aciona o botão com foco; com o vídeo em foco, alterna reprodução e pausa |
 | Sobre o projeto | Método, equipe, origem da filmagem, resultados e limitações |
+| Vídeos e vagas | Troca o painel principal pelo editor de mapas, sem outra janela de edição |
+| Demonstração | Retorna ao exemplo incluído depois de analisar um perfil local |
 
 A navegação usa uma lateral azul-escura e os contadores destacam os totais do quadro atual. A lista mostra etiquetas de estado com texto e fundo colorido. Os controles reservam o mesmo contorno em repouso, seleção e foco, evitando deslocamentos durante a navegação.
 
@@ -51,9 +53,19 @@ O histórico inclui somente mudanças confirmadas até o instante mostrado; as c
 
 Ao selecionar V70 ou V71, o detalhe mostra o motivo da análise conjunta. O amarelo não significa vaga disponível: indica que o programa não confirma a ocupação individual porque um mesmo objeto claro atravessa as duas regiões. A V69, acima da V59, participa normalmente da classificação.
 
+## Outros vídeos e editor
+
+Abra **Vídeos e vagas → Adicionar vídeo**, escolha o arquivo, dê um nome e desenhe as vagas com retângulos ou quatro pontos. Em **Mover / ajustar**, arraste o interior ou os cantos da região selecionada. A lista, a exclusão, desfazer e refazer permitem corrigir o mapa. **Conferir neste quadro** mostra uma classificação pontual antes da análise completa.
+
+**Salvar e analisar** persiste o perfil e retorna ao monitoramento na mesma janela. Uma edição cria uma revisão com resultados separados; **Abrir análise** reusa um perfil sem alterações quando os resultados estão completos. **Voltar** mantém o rascunho enquanto o aplicativo continua aberto. O vídeo permanece no local original e os perfis em `perfis/` não são enviados ao GitHub. Consulte [EDITOR_DE_VAGAS.md](EDITOR_DE_VAGAS.md) para os passos e limites.
+
+O mapa não é descoberto automaticamente. Cada enquadramento exige cadastro e conferência dos limiares; a câmera precisa ficar fixa. Vídeos próprios não recebem os rótulos ou as métricas do exemplo. A página Sobre mostra **Sem avaliação rotulada** nesses perfis.
+
 ## Exportações
 
 **Exportar resultados** abre o seletor de destino para um ZIP com `ocupacao.csv`, `eventos.csv`, `resumo.json`, `avaliacao.json`, `ultimo_quadro.png` e `video_anotado.mp4`. São os resultados da análise completa, independentemente do filtro ou quadro mostrado. O arquivo de destino é escrito de forma temporária antes de substituir o ZIP escolhido.
+
+Em perfis locais, o ZIP também inclui `mapa.json` e `referencia.png`; `avaliacao.json` não é gerado automaticamente para esses vídeos. Seus resultados ficam na pasta da revisão do perfil, separados de `resultados/carpark/`.
 
 Os resultados originais ficam em `resultados/carpark/`. O botão Reprocessar invalida os resumos anteriores antes de analisar novamente; uma execução incompleta não deve ser apresentada como análise concluída. Fechar a janela durante o processamento encerra o processo do detector.
 

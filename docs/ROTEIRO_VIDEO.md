@@ -50,6 +50,8 @@ O exemplo real já cadastrado abre em uma janela nativa com `.\.venv\Scripts\pyt
 
 ## Edson Leandro Soares continua a demonstração
 
+Durante o trecho de cadastro, mostrar brevemente **Vídeos e vagas** no próprio painel. Explicar Adicionar vídeo, retângulo ou quatro pontos, Mover / ajustar e Salvar e analisar. Pode usar **Demonstração · criar uma cópia** para ilustrar o editor sem alterar o mapa original. Se usar outro vídeo, identificar sua origem e explicar que as vagas são cadastradas manualmente e os limiares precisam ser conferidos. Não atribuir a ele a precisão medida no exemplo incluído. Retornar por Voltar ou Monitoramento, na mesma janela, mantendo esse trecho dentro do tempo reservado à demonstração.
+
 Na gravação externa, mostrar as saídas de V01, V02 e V03, confirmadas nos quadros 118, 172 e 370. Essa gravação não contém entradas de veículos estacionando; para demonstrar uma entrada, usar a simulação identificada ou a coleta própria. Destacar os cinco quadros de confirmação e explicar que liberação parcial de uma vaga pode ser indicada antes da saída física completa. Mostrar um veículo parado mantendo o estado ocupado. Se a coleta tiver falhas com sombras, mostrar um exemplo e explicar a limitação.
 
 Na janela Vaga, selecionar uma vaga, aplicar Somente livres e voltar a uma mudança pelo histórico. Usar Exportar resultados, extrair o ZIP, abrir `ocupacao.csv` e explicar quadro, tempo estimado, vaga, estado e densidade de textura. Abrir o vídeo exportado. Não apresentar o FPS do arquivo como velocidade medida do algoritmo.
