@@ -12,7 +12,7 @@ O projeto investiga a dificuldade de consultar rapidamente quais vagas de um est
 
 ## Situação atual
 
-O protótipo funciona com dados simulados e está preparado para receber imagens e vídeos reais. A coleta e a validação em estacionamento real estão em andamento nas [issues do projeto](https://github.com/VitorRodi/detector-vagas-estacionamento/issues). O vídeo final do grupo ainda não foi gravado ou publicado. A entrega exigida é um link do YouTube acessível e este repositório público.
+O protótipo foi verificado com dados simulados. O repositório também inclui uma filmagem real de terceiros para os próximos testes. A coleta própria e a validação do detector em estacionamento real são acompanhadas nas [issues do projeto](https://github.com/VitorRodi/detector-vagas-estacionamento/issues). O vídeo final do grupo ainda não foi gravado ou publicado. A entrega exigida é um link do YouTube acessível e este repositório público.
 
 ![Demonstração com seis vagas simuladas](assets/demonstracao_simulada.png)
 
@@ -46,6 +46,14 @@ py -m venv .venv
 Os dados de entrada simulados estão versionados e podem ser regenerados. Os arquivos de saída são criados pelos comandos acima. Abra `resultados/imagem/imagem_anotada.png` ou `resultados/video/video_anotado.mp4` para consultar a saída. Adicione `--show` para exibir uma janela; use Q para sair. Em Linux e macOS, crie o ambiente com `python3 -m venv .venv` e use `.venv/bin/python` nos mesmos comandos.
 
 ## Usar imagens reais
+
+### Vídeo externo incluído
+
+[Abrir carPark.mp4](dados/terceiros/carPark.mp4): filmagem de estacionamento com 679 quadros, 24 FPS, resolução de 1100 × 720 e duração aproximada de 28,29 segundos. O arquivo foi obtido do projeto de [Harsh Bafna](https://github.com/harshbafnaa/car-parking-detection). Os créditos, a declaração de licença na fonte e a revisão utilizada estão em [docs/FONTES_MIDIA.md](docs/FONTES_MIDIA.md); a integridade e as características do arquivo estão em [carPark.metadata.json](dados/terceiros/carPark.metadata.json).
+
+O arquivo é uma entrada para experimentos, não uma gravação do grupo nem um resultado do nosso detector. Antes de processá-lo, identifiquem vagas vazias em um quadro, extraiam a referência e cadastrem somente essas vagas. Não usem o JSON da simulação neste vídeo. A inclusão do arquivo ainda não valida o algoritmo em cenas reais.
+
+### Gravação e calibração
 
 1. Siga o [guia de gravação](docs/COLETA_REAL.md), fixe a câmera e mantenha a mesma posição, foco e resolução. Guarde os vídeos locais em `dados/reais/`, que não é publicado automaticamente.
 2. Localize no vídeo um quadro com **todas as vagas que serão cadastradas vazias**. Extraia esse quadro na resolução original. Não presuma que o primeiro quadro esteja vazio:
@@ -100,6 +108,7 @@ verificar_demo.py           Conferência independente da saída simulada
 requirements.txt           Dependências
 tests/                     Testes de comportamento
 dados/                     Entradas simuladas reproduzíveis
+dados/terceiros/            Filmagem externa e registro de origem
 assets/                    Imagem da demonstração
 docs/COLETA_REAL.md         Como gravar e registrar imagens reais
 docs/ROTEIRO_VIDEO.md       Roteiro com participação dos quatro integrantes

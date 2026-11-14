@@ -1,6 +1,6 @@
 # Gravação e validação no estacionamento
 
-Este guia prepara a coleta real. Até o momento, o projeto contém apenas cenas simuladas. Registrar o que foi observado e obtido em campo sem completar resultados com suposições.
+Este guia prepara a coleta própria em estacionamento real. O projeto contém cenas simuladas e um vídeo externo documentado em `FONTES_MIDIA.md`; ainda não há gravações do grupo. Registrar o que foi observado e obtido em campo sem completar resultados com suposições.
 
 ## Escolher o local
 

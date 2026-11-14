@@ -1,0 +1,17 @@
+{
+  "arquivo": "carPark.mp4",
+  "tipo": "filmagem real de terceiros",
+  "origem": "https://github.com/harshbafnaa/car-parking-detection",
+  "origem_revisao": "a35ce5055beb2d50eac971254720892944e0f7fb",
+  "origem_git_blob": "26ef771badb3cbb5244acffd44703ea9ff2fbf2d",
+  "sha256": "f2d804e9b2e8ff7e0ae9776068a9cbc8126b6bce2e09ef6f56d3ad9c8fe84069",
+  "bytes": 10607736,
+  "largura": 1100,
+  "altura": 720,
+  "fps": 24.0,
+  "quadros_decodificados": 679,
+  "duracao_segundos": 28.291667,
+  "data_obtencao": "2026-11-13",
+  "gravacao_do_grupo": false,
+  "validacao_do_detector": false
+}
